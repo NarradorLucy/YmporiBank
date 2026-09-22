@@ -52,17 +52,17 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
     <button id="tabRegister" onclick="switchAuthTab('register')">Cadastrar</button>
   </div>
   
-  <form id="formLogin" onsubmit="handleLogin(event)">
+  <form id="formLogin">
     <div class="field"><label>Login / Usuário</label><input id="loginUser" required></div>
     <div class="field"><label>Senha</label><input id="loginPass" type="password" required></div>
-    <button class="btn" style="margin-top: 10px;">Entrar</button>
+    <button type="submit" id="btnLogin" class="btn" style="margin-top: 10px;">Entrar</button>
   </form>
 
-  <form id="formRegister" onsubmit="handleRegister(event)" style="display:none;">
+  <form id="formRegister" style="display:none;">
     <div class="field"><label>Nome de Exibição</label><input id="regName" required></div>
     <div class="field"><label>Login / Usuário</label><input id="regUser" required></div>
     <div class="field"><label>Senha</label><input id="regPass" type="password" minlength="6" required></div>
-    <button class="btn" style="margin-top: 10px;">Criar Conta (+500,00 Yinporion)</button>
+    <button type="submit" id="btnRegister" class="btn" style="margin-top: 10px;">Criar Conta (+500,00 Yinporion)</button>
   </form>
 </div>
 
@@ -88,7 +88,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
     <h1><span id="displayUserName">--</span> <small id="displayUserCode" style="font-size:16px; color:var(--accent); margin-left: 8px;"></small></h1>
   </div>
   <div class="top-user-actions">
-    <!-- Sistema de Notificações -->
     <div class="notification-bell" onclick="toggleNotifications()" title="Notificações">
       🔔
       <span id="notifBadge" class="notification-badge">0</span>
@@ -129,7 +128,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 </div>
 </section>
 
-<!-- SEÇÃO DE INVESTIMENTOS -->
 <section id="investments" class="page">
 <div class="top"><div><div class="label">Ympori Bank</div><h1>Área de Investimentos</h1></div></div>
 <div class="grid">
@@ -166,7 +164,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 </div>
 </section>
 
-<!-- SEÇÃO DE PERFIL -->
 <section id="profile" class="page">
 <div class="top"><div><div class="label">Conta</div><h1>Meu perfil</h1></div></div>
 <div class="grid">
@@ -182,7 +179,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
   </div>
   <div class="card">
     <h2>Personalizar Perfil</h2>
-    <form onsubmit="handleSaveProfileCustomization(event)" style="margin-top:15px;">
+    <form id="formProfileCustom" style="margin-top:15px;">
       <div class="field"><label>Nome de Exibição</label><input id="customProfileName" required></div>
       <div class="field"><label>Sua Inicial / Letra do Avatar</label><input id="customAvatarLetter" maxlength="2" required></div>
       <div class="field"><label>Cor de Destaque do Perfil</label><input type="color" id="customColor" value="#8b7cff" style="height:45px; padding:4px; cursor:pointer;"></div>
@@ -195,7 +192,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 <section id="settings" class="page">
 <div class="top"><div><div class="label">Ympori Bank</div><h1>Configurações</h1></div></div>
 <div class="card">
-<form onsubmit="handleSaveSettings(event)">
+<form id="formSettings">
 <div class="field"><label>Nome exibido</label><input id="setProfileName"></div>
 <button class="btn">Salvar alterações</button>
 </form>
@@ -212,11 +209,11 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 <button onclick="showPage('profile',this)">◉<br>Perfil</button>
 </div>
 
-<!-- MODAL DE TRANSFERÊNCIA -->
+<!-- MODAIS -->
 <div id="transferModal" class="modal">
   <div class="modal-content">
     <h2 style="margin-bottom:16px;">Transferir Yinporion</h2>
-    <form id="transferFormStep1" onsubmit="prepareTransferConfirmation(event)">
+    <form id="transferFormStep1">
       <div class="field"><label>Código do Destinatário (ex: YMP-1234)</label><input id="transCode" placeholder="YMP-XXXX" required></div>
       <div class="field"><label>Valor (Yinporion)</label><input id="transAmount" type="number" step="0.01" min="0.01" required></div>
       <div style="display:flex; gap:10px; margin-top:10px;">
@@ -240,11 +237,10 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
   </div>
 </div>
 
-<!-- MODAL DE INVESTIMENTO -->
 <div id="investModal" class="modal">
   <div class="modal-content">
     <h2 id="investModalTitle" style="margin-bottom:16px;">Investir</h2>
-    <form onsubmit="handleInvestAction(event)">
+    <form id="formInvest">
       <div class="field"><label>Valor (Yinporion)</label><input id="investAmountInput" type="number" step="0.01" min="0.01" required></div>
       <div style="display:flex; gap:10px; margin-top:10px;">
         <button type="button" class="btn alt" onclick="closeInvestModal()" style="flex:1;">Cancelar</button>
@@ -256,7 +252,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 
 <div id="toast" class="toast"></div>
 
-<!-- SDKs do Firebase -->
+<!-- SDK Firebase Integrado via Módulo JS -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -282,16 +278,14 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
   let pendingTransferData = null;
   let investActionType = 'invest';
 
-  // Converte username interno para o padrão de email Firebase
   function formatEmail(user) {
     return `${user.toLowerCase().trim().replace(/[^a-z0-9]/g, '')}@ympori.com`;
   }
 
-  // Monitorar Estado de Autenticação em Tempo Real
+  // Monitorar Estado da Autenticação
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentAuthUser = user;
-      // Escuta mudanças nos dados do usuário logado no Firestore
       if (unsubscribeUserData) unsubscribeUserData();
       
       unsubscribeUserData = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
@@ -312,6 +306,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
     }
   });
 
+  // Alternar abas da tela de Auth
   window.switchAuthTab = function(tab) {
     if (tab === 'login') {
       document.getElementById('formLogin').style.display = 'grid';
@@ -326,12 +321,58 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
     }
   };
 
-  window.handleRegister = async function(e) {
+  // Login
+  document.getElementById('formLogin').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const btn = document.getElementById('btnLogin');
+    const username = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value.trim();
+    const email = formatEmail(username);
+
+    btn.textContent = 'Conectando...';
+    btn.disabled = true;
+
+    try {
+      const userCred = await signInWithEmailAndPassword(auth, email, pass);
+      const userDocRef = doc(db, "users", userCred.user.uid);
+      const docSnap = await getDoc(userDocRef);
+      
+      if (docSnap.exists()) {
+        const acc = docSnap.data();
+        if (acc.investedBalance && acc.investedBalance > 0) {
+          const randomPercent = Math.floor(Math.random() * (100 - (-76) + 1)) + (-76);
+          const yieldAmount = acc.investedBalance * (randomPercent / 100);
+          const newInvested = Math.max(0, acc.investedBalance + yieldAmount);
+          const sign = randomPercent >= 0 ? '+' : '';
+          const textMsg = `Seu investimento rendeu ${sign}${randomPercent}% (${yieldAmount.toFixed(2)} Yinporions).`;
+          
+          await updateDoc(userDocRef, {
+            investedBalance: newInvested,
+            lastYield: randomPercent,
+            notifications: arrayUnion({ text: textMsg, date: new Date().toLocaleDateString('pt-BR') })
+          });
+        }
+      }
+      toast('Login efetuado com sucesso!');
+    } catch (err) {
+      toast('Usuário ou senha incorretos!');
+    } finally {
+      btn.textContent = 'Entrar';
+      btn.disabled = false;
+    }
+  });
+
+  // Registro
+  document.getElementById('formRegister').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnRegister');
     const name = document.getElementById('regName').value.trim();
     const username = document.getElementById('regUser').value.trim();
     const pass = document.getElementById('regPass').value.trim();
     const email = formatEmail(username);
+
+    btn.textContent = 'Criando conta...';
+    btn.disabled = true;
 
     try {
       const userCred = await createUserWithEmailAndPassword(auth, email, pass);
@@ -363,41 +404,11 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
       toast('Conta criada com sucesso!');
     } catch (err) {
       toast('Erro ao cadastrar: ' + err.message);
+    } finally {
+      btn.textContent = 'Criar Conta (+500,00 Yinporion)';
+      btn.disabled = false;
     }
-  };
-
-  window.handleLogin = async function(e) {
-    e.preventDefault();
-    const username = document.getElementById('loginUser').value.trim();
-    const pass = document.getElementById('loginPass').value.trim();
-    const email = formatEmail(username);
-
-    try {
-      const userCred = await signInWithEmailAndPassword(auth, email, pass);
-      // Aplicar Rendimento Aleatório ao Logar (-76% a +100%)
-      const userDocRef = doc(db, "users", userCred.user.uid);
-      const docSnap = await getDoc(userDocRef);
-      if (docSnap.exists()) {
-        const acc = docSnap.data();
-        if (acc.investedBalance && acc.investedBalance > 0) {
-          const randomPercent = Math.floor(Math.random() * (100 - (-76) + 1)) + (-76);
-          const yieldAmount = acc.investedBalance * (randomPercent / 100);
-          const newInvested = Math.max(0, acc.investedBalance + yieldAmount);
-          const sign = randomPercent >= 0 ? '+' : '';
-          const textMsg = `Seu investimento rendeu ${sign}${randomPercent}% (${yieldAmount.toFixed(2)} Yinporions).`;
-          
-          await updateDoc(userDocRef, {
-            investedBalance: newInvested,
-            lastYield: randomPercent,
-            notifications: arrayUnion({ text: textMsg, date: new Date().toLocaleDateString('pt-BR') })
-          });
-        }
-      }
-      toast('Login realizado!');
-    } catch (err) {
-      toast('Usuário ou senha incorretos!');
-    }
-  };
+  });
 
   window.logout = function() {
     signOut(auth);
@@ -522,7 +533,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
     document.getElementById('transferModal').style.display = 'none';
   };
 
-  window.prepareTransferConfirmation = async function(e) {
+  document.getElementById('transferFormStep1').addEventListener('submit', async (e) => {
     e.preventDefault();
     const code = document.getElementById('transCode').value.trim();
     const amount = parseFloat(document.getElementById('transAmount').value);
@@ -542,7 +553,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
       return;
     }
 
-    // Buscar destinatário pelo código no Firestore
     const q = query(collection(db, "users"), where("code", "==", code));
     const querySnapshot = await getDocs(q);
 
@@ -562,7 +572,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 
     document.getElementById('transferFormStep1').style.display = 'none';
     document.getElementById('transferFormStep2').style.display = 'block';
-  };
+  });
 
   window.backToTransferStep1 = function() {
     document.getElementById('transferFormStep1').style.display = 'grid';
@@ -618,7 +628,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
     document.getElementById('investModal').style.display = 'none';
   };
 
-  window.handleInvestAction = async function(e) {
+  document.getElementById('formInvest').addEventListener('submit', async (e) => {
     e.preventDefault();
     const amount = parseFloat(document.getElementById('investAmountInput').value);
     const userRef = doc(db, "users", currentAuthUser.uid);
@@ -649,9 +659,9 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
     }
 
     window.closeInvestModal();
-  };
+  });
 
-  window.handleSaveProfileCustomization = async function(e) {
+  document.getElementById('formProfileCustom').addEventListener('submit', async (e) => {
     e.preventDefault();
     const newName = document.getElementById('customProfileName').value.trim();
     const newLetter = document.getElementById('customAvatarLetter').value.trim().toUpperCase();
@@ -666,9 +676,9 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
       });
       toast('Perfil personalizado com sucesso!');
     }
-  };
+  });
 
-  window.handleSaveSettings = async function(e) {
+  document.getElementById('formSettings').addEventListener('submit', async (e) => {
     e.preventDefault();
     const newName = document.getElementById('setProfileName').value.trim();
     if (newName) {
@@ -676,7 +686,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
       await updateDoc(userRef, { name: newName });
       toast('Nome alterado com sucesso!');
     }
-  };
+  });
 
   window.showPage = function(id, btn) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
