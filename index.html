@@ -745,12 +745,14 @@ window.toast = function(msg) {
   setTimeout(() => t.style.display = 'none', 2200);
 }
 
-window.onclick = function(event) {
-  if (!event.target.closest('.notification-bell')) {
+// Fechamento seguro do menu de notificações
+window.addEventListener('click', function(event) {
+  const e = event || window.event;
+  if (e && e.target && !e.target.closest('.notification-bell')) {
     const dropdown = document.getElementById('notifDropdown');
     if (dropdown) dropdown.style.display = 'none';
   }
-}
+});
 
 (async function startup() {
   await initDB();
