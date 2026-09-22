@@ -1,218 +1,381 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ympori Bank</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #10b981;
-            --danger: #ef4444;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ympori Bank</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080b14;--panel:#111728;--panel2:#171e32;--text:#eef2ff;--muted:#929bb5;--accent:#8b7cff;--accent2:#38d9c3;--danger:#ff6685}
+body{font-family:Inter,system-ui,Arial,sans-serif;background:radial-gradient(circle at 80% 0%,#25204d 0,#080b14 38%);color:var(--text);min-height:100vh}
+button,input{font:inherit}.app{display:flex;min-height:100vh}
+.sidebar{width:250px;background:rgba(8,11,20,.88);border-right:1px solid #242b40;padding:25px 16px;position:fixed;inset:0 auto 0 0;z-index:5}
+.logo{font-size:24px;font-weight:800;padding:0 12px 28px}.logo span{color:var(--accent)}
+.nav button{display:block;width:100%;padding:13px 14px;margin:5px 0;border:0;border-radius:12px;background:transparent;color:var(--muted);text-align:left;cursor:pointer}
+.nav button.active,.nav button:hover{background:var(--panel2);color:#fff}
+.content{margin-left:250px;width:calc(100% - 250px);padding:34px;max-width:1400px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}.top h1{font-size:28px}
+.top-user-actions{display:flex;align-items:center;gap:12px}
+.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:800;cursor:pointer}
+.btn-logout-top{background:rgba(255,102,133,0.12);border:1px solid rgba(255,102,133,0.3);color:var(--danger);padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px;transition:0.2s}
+.btn-logout-top:hover{background:var(--danger);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:linear-gradient(145deg,rgba(23,30,50,.94),rgba(14,19,33,.94));border:1px solid #28314a;border-radius:18px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.18)}
+.balance{grid-column:span 2;min-height:190px;background:linear-gradient(135deg,#29235d,#151b31 65%)}.label{color:var(--muted);font-size:13px}.amount{font-size:39px;font-weight:800;margin:12px 0 20px}.positive{color:var(--accent2)}.negative{color:var(--danger)}.actions{display:flex;gap:10px}.btn{border:0;border-radius:10px;padding:10px 15px;background:var(--accent);color:#fff;cursor:pointer;font-weight:700;display:inline-block;text-align:center}.btn.alt{background:#252d46}.section{margin-top:26px}.section h2{font-size:18px;margin-bottom:14px}.transactions{grid-column:span 2}.tx{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #252d42}.tx:last-child{border:0}.tx small{color:var(--muted)}.icon{width:38px;height:38px;border-radius:11px;background:#232b43;display:grid;place-items:center;margin-right:12px}.txleft{display:flex;align-items:center}.profile{min-height:160px}.page{display:none}.page.active{display:block}
+form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field label{font-size:13px;color:var(--muted)}input,select{background:#0c1120;border:1px solid #2b3550;color:#fff;border-radius:10px;padding:12px;outline:none}input:focus,select:focus{border-color:var(--accent)}
+.card-number{font-size:19px;letter-spacing:2px;margin:32px 0 20px}.mini{display:flex;justify-content:space-between;color:#c9cfea}
+.mobilebar{display:none}
+.toast{position:fixed;right:25px;bottom:25px;background:#171e32;border:1px solid #303b59;padding:13px 18px;border-radius:12px;display:none;z-index:20}
+.auth-container{max-width:400px;margin:80px auto;background:rgba(17,23,40,.95);padding:30px;border-radius:18px;border:1px solid #28314a;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.auth-tabs{display:flex;margin-bottom:20px;border-bottom:1px solid #2b3550}
+.auth-tabs button{flex:1;padding:10px;background:none;border:none;color:var(--muted);cursor:pointer;font-weight:700}
+.auth-tabs button.active{color:var(--accent);border-bottom:2px solid var(--accent)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;place-items:center;z-index:30}
+.modal-content{background:#111728;padding:24px;border-radius:18px;border:1px solid #28314a;width:100%;max-width:400px}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+/* Notificações */
+.notification-bell{position:relative;cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid #2b3550;padding:10px;border-radius:12px;display:grid;place-items:center;color:var(--text)}
+.notification-badge{position:absolute;top:-5px;right:-5px;background:var(--danger);color:#fff;font-size:10px;font-weight:bold;padding:2px 6px;border-radius:10px;display:none}
+.notifications-dropdown{position:absolute;right:0;top:55px;width:320px;background:#111728;border:1px solid #28314a;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.5);display:none;z-index:50;padding:15px}
+.notifications-dropdown h3{font-size:15px;margin-bottom:10px;border-bottom:1px solid #252d42;padding-bottom:8px}
+.notif-item{font-size:12px;padding:8px 0;border-bottom:1px solid #1f2840;color:var(--muted)}
+.notif-item:last-child{border:0}
 
-        .container {
-            width: 100%;
-            max-width: 480px;
-            background-color: var(--card-bg);
-            padding: 24px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--primary);
-            margin-bottom: 24px;
-            font-size: 1.8rem;
-        }
-
-        .balance-card {
-            background: linear-gradient(135deg, #1e40af, #2563eb);
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .balance-card h2 {
-            margin: 0;
-            font-size: 1rem;
-            color: #cbd5e1;
-        }
-
-        .balance-card p {
-            font-size: 2.2rem;
-            margin: 10px 0 0 0;
-            font-weight: bold;
-        }
-
-        .section {
-            margin-bottom: 20px;
-        }
-
-        input, button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 8px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background-color: #0f172a;
-            color: var(--text-color);
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        button {
-            background-color: var(--primary);
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        button:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-        }
-        .btn-danger:hover {
-            background-color: #dc2626;
-        }
-
-        .sync-status {
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 15px;
-        }
-    </style>
+@media(max-width:800px){.sidebar{display:none}.content{margin:0;width:100%;padding:22px 16px 85px}.grid{grid-template-columns:1fr}.balance,.transactions{grid-column:span 1}.mobilebar{display:flex;position:fixed;bottom:0;left:0;right:0;background:#0d1220;border-top:1px solid #252d42;z-index:10;justify-content:space-around;padding:9px}.mobilebar button{background:none;border:0;color:var(--muted);font-size:11px}.mobilebar button.active{color:#fff}}
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Ympori Bank</h1>
+<div id="authScreen" class="auth-container">
+  <div class="logo" style="text-align: center; padding-bottom: 20px;">Ympori<span>Bank</span></div>
+  <div class="auth-tabs">
+    <button id="tabLogin" class="active" onclick="switchAuthTab('login')">Entrar</button>
+    <button id="tabRegister" onclick="switchAuthTab('register')">Cadastrar</button>
+  </div>
+  
+  <form id="formLogin" onsubmit="handleLogin(event)">
+    <div class="field"><label>Login / Usuário</label><input id="loginUser" required></div>
+    <div class="field"><label>Senha</label><input id="loginPass" type="password" required></div>
+    <button class="btn" style="margin-top: 10px;">Entrar</button>
+  </form>
 
-        <div class="balance-card">
-            <h2>Saldo Atual</h2>
-            <p id="saldoDisplay">R$ 0,00</p>
-        </div>
+  <form id="formRegister" onsubmit="handleRegister(event)" style="display:none;">
+    <div class="field"><label>Nome de Exibição</label><input id="regName" required></div>
+    <div class="field"><label>Login / Usuário</label><input id="regUser" required></div>
+    <div class="field"><label>Senha</label><input id="regPass" type="password" required></div>
+    <button class="btn" style="margin-top: 10px;">Criar Conta (+500,00 Yinporion)</button>
+  </form>
+</div>
 
-        <div class="section">
-            <label for="valorInput">Valor (R$):</label>
-            <input type="number" id="valorInput" placeholder="0.00" step="0.01">
-            <button onclick="adicionarSaldo()">Adicionar Saldo</button>
-        </div>
+<div id="appScreen" class="app" style="display:none;">
+<aside class="sidebar">
+  <div class="logo">Ympori<span>Bank</span></div>
+  <nav class="nav">
+    <button class="active" onclick="showPage('home',this)">⌂ &nbsp; Início</button>
+    <button onclick="showPage('cards',this)">▣ &nbsp; Cartões</button>
+    <button onclick="showPage('investments',this)">📈 &nbsp; Investimentos</button>
+    <button onclick="showPage('history',this)">↔ &nbsp; Extrato</button>
+    <button onclick="showPage('profile',this)">◉ &nbsp; Perfil</button>
+    <button onclick="showPage('settings',this)">⚙ &nbsp; Configurações</button>
+    <button onclick="logout()" style="color: var(--danger); margin-top: 20px;">⎋ &nbsp; Sair</button>
+  </nav>
+</aside>
 
-        <div class="section">
-            <button class="btn-danger" onclick="zerarSaldo()">Zerar Conta</button>
-        </div>
-
-        <div class="sync-status" id="syncStatus">Conectando à nuvem...</div>
+<main class="content">
+<section id="home" class="page active">
+<div class="top">
+  <div>
+    <div class="label">Bem-vindo de volta</div>
+    <h1><span id="displayUserName">--</span> <small id="displayUserCode" style="font-size:16px; color:var(--accent); margin-left: 8px;"></small></h1>
+  </div>
+  <div class="top-user-actions">
+    <!-- Sistema de Notificações -->
+    <div class="notification-bell" onclick="toggleNotifications()" title="Notificações">
+      🔔
+      <span id="notifBadge" class="notification-badge">0</span>
+      <div id="notifDropdown" class="notifications-dropdown" onclick="event.stopPropagation()">
+        <h3>Notificações</h3>
+        <div id="notifList"><p class="label">Nenhuma nova notificação</p></div>
+      </div>
     </div>
+    <div class="avatar" id="displayAvatar" onclick="showPage('profile')" title="Ver Perfil">N</div>
+    <button class="btn-logout-top" onclick="logout()" title="Sair da conta">⎋ Sair</button>
+  </div>
+</div>
+<div class="grid">
+<div class="card balance">
+  <div class="label">Saldo disponível</div>
+  <div class="amount" id="displayBalance">Yinporion 0,00</div>
+  <div class="actions">
+    <button class="btn" onclick="openTransferModal()">Transferir</button>
+  </div>
+</div>
+<div class="card"><div class="label">Rendimento atual</div><div class="amount positive" id="displayHomeYield">+0,00%</div><div class="label">Baseado na última sessão de mercado</div></div>
+<div class="card"><div class="label">Cartão principal</div><div class="card-number" id="displayCardNumber">•••• ----</div><div class="mini"><span id="displayCardHolder">----</span><span>09/29</span></div></div>
+<div class="card transactions">
+  <div class="section" style="margin-top:0">
+    <h2>Últimas transações</h2>
+    <div id="txList"></div>
+  </div>
+</div>
+<div class="card"><div class="label">Limite do cartão</div><div class="amount">Yinporion 8.000,00</div><div class="label">Disponível: Yinporion 6.920,40</div></div>
+</div>
+</section>
 
-    <!-- Script com Firebase e Lógica de Tempo Real -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<section id="cards" class="page">
+<div class="top"><div><div class="label">Ympori Bank</div><h1>Meus cartões</h1></div></div>
+<div class="grid">
+<div class="card balance"><div class="label">Ympori Black</div><div class="card-number" id="displayCardNumber2">YMPORI •••• ----</div><div class="mini"><span id="displayCardHolder2">----</span><span>09/29</span></div></div>
+<div class="card"><div class="label">Limite total</div><div class="amount">Yinporion 8.000,00</div><button class="btn" onclick="toast('Cartão ativo')">Gerenciar cartão</button></div>
+</div>
+</section>
 
-        // COLOQUE AQUI AS SUAS CONFIGURAÇÕES REAIS DO FIREBASE
-        const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_AUTH_DOMAIN",
-            projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_STORAGE_BUCKET",
-            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-            appId: "SEU_APP_ID"
-        };
+<!-- SEÇÃO DE INVESTIMENTOS COM RENDIMENTO -76% A +100% -->
+<section id="investments" class="page">
+<div class="top"><div><div class="label">Ympori Bank</div><h1>Área de Investimentos</h1></div></div>
+<div class="grid">
+  <div class="card balance">
+    <div class="label">Saldo Investido Atual</div>
+    <div class="amount" id="displayInvestedBalance">Yinporion 0,00</div>
+    <div class="label" id="lastYieldText" style="margin-top: 5px;">Última variação de mercado: --</div>
+    <div class="actions" style="margin-top: 15px;">
+      <button class="btn" onclick="openInvestModal('invest')">Investir Saldo</button>
+      <button class="btn alt" onclick="openInvestModal('withdraw')">Resgatar</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">Regra de Mercado</div>
+    <p style="font-size: 13px; color: var(--muted); margin-top: 10px; line-height: 1.5;">
+      O mercado Ympori é altamente volátil. Sempre que você entra na sua conta, seus investimentos sofrem uma variação aleatória entre <strong>-76%</strong> e <strong>+100%</strong>.
+    </p>
+  </div>
+</div>
+</section>
 
-        // Inicializar Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+<section id="history" class="page">
+<div class="top"><div><div class="label">Ympori Bank</div><h1>Extrato de Transações</h1></div></div>
+<div class="card" style="margin-bottom: 20px; display:flex; gap:10px; align-items:center;">
+  <label style="font-size:13px; color:var(--muted);">Filtrar:</label>
+  <select id="txFilter" onchange="renderTransactions()" style="padding:8px; border-radius:8px;">
+    <option value="all">Todas</option>
+    <option value="in">Entradas</option>
+    <option value="out">Saídas</option>
+  </select>
+</div>
+<div class="card">
+  <div id="txListFull"></div>
+</div>
+</section>
 
-        // ID fixo do documento para simular a conta sincronizada (mude se quiser separar usuários)
-        const docRef = doc(db, "banco", "conta_principal");
+<!-- SEÇÃO DE PERFIL COM PERSONALIZAÇÃO -->
+<section id="profile" class="page">
+<div class="top"><div><div class="label">Conta</div><h1>Meu perfil</h1></div></div>
+<div class="grid">
+  <div class="card profile">
+    <div style="display:flex; align-items:center; gap:20px;">
+      <div class="avatar" id="profileAvatarLarge" style="width:70px; height:70px; font-size:24px;">N</div>
+      <div>
+        <h2 id="profileName">--</h2>
+        <p class="label" style="margin-top:4px">Código: <strong id="profileCode" style="color:var(--accent);">--</strong></p>
+      </div>
+    </div>
+    <div style="margin-top:22px"><button class="btn" onclick="toast('Perfil verificado')">Status: Conta Ativa</button></div>
+  </div>
+  <div class="card">
+    <h2>Personalizar Perfil</h2>
+    <form onsubmit="handleSaveProfileCustomization(event)" style="margin-top:15px;">
+      <div class="field"><label>Nome de Exibição</label><input id="customProfileName" required></div>
+      <div class="field"><label>Sua Inicial / Letra do Avatar</label><input id="customAvatarLetter" maxlength="2" required></div>
+      <div class="field"><label>Cor de Destaque do Perfil</label><input type="color" id="customColor" value="#8b7cff" style="height:45px; padding:4px; cursor:pointer;"></div>
+      <button class="btn" style="margin-top:10px;">Salvar Personalização</button>
+    </form>
+  </div>
+</div>
+</section>
 
-        let dadosApp = {
-            saldo: 0
-        };
+<section id="settings" class="page">
+<div class="top"><div><div class="label">Ympori Bank</div><h1>Configurações</h1></div></div>
+<div class="card">
+<form onsubmit="handleSaveSettings(event)">
+<div class="field"><label>Nome exibido</label><input id="setProfileName"></div>
+<button class="btn">Salvar alterações</button>
+</form>
+</div>
+</section>
+</main>
+</div>
 
-        // Função para atualizar a interface visualmente
-        function atualizarInterface() {
-            document.getElementById("saldoDisplay").innerText = `R$ ${dadosApp.saldo.toFixed(2).replace('.', ',')}`;
+<div class="mobilebar">
+<button class="active" onclick="showPage('home',this)">⌂<br>Início</button>
+<button onclick="showPage('cards',this)">▣<br>Cartões</button>
+<button onclick="showPage('investments',this)">📈<br>Investir</button>
+<button onclick="showPage('history',this)">↔<br>Extrato</button>
+<button onclick="showPage('profile',this)">◉<br>Perfil</button>
+</div>
+
+<!-- MODAL DE CONFIRMAÇÃO DE TRANSFERÊNCIA -->
+<div id="transferModal" class="modal">
+  <div class="modal-content">
+    <h2 style="margin-bottom:16px;">Transferir Yinporion</h2>
+    <form id="transferFormStep1" onsubmit="prepareTransferConfirmation(event)">
+      <div class="field"><label>Código do Destinatário (ex: YMP-1234)</label><input id="transCode" placeholder="YMP-XXXX" required></div>
+      <div class="field"><label>Valor (Yinporion)</label><input id="transAmount" type="number" step="0.01" min="0.01" required></div>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button type="button" class="btn alt" onclick="closeTransferModal()" style="flex:1;">Cancelar</button>
+        <button class="btn" style="flex:1;">Continuar</button>
+      </div>
+    </form>
+
+    <!-- Tela de Revisão/Confirmação -->
+    <div id="transferFormStep2" style="display:none; margin-top:10px;">
+      <p class="label" style="margin-bottom:12px;">Por favor, confirme os dados da transferência:</p>
+      <div style="background:var(--panel2); padding:12px; border-radius:10px; margin-bottom:15px; font-size:14px; display:grid; gap:6px;">
+        <div><strong>Destinatário:</strong> <span id="confDestName">--</span></div>
+        <div><strong>Código:</strong> <span id="confDestCode">--</span></div>
+        <div><strong>Valor:</strong> <span id="confAmount" style="color:var(--accent2)">--</span></div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="btn alt" onclick="backToTransferStep1()" style="flex:1;">Voltar</button>
+        <button type="button" class="btn" onclick="executeConfirmedTransfer()" style="flex:1;">Confirmar Envio</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE INVESTIMENTO (APLICAR OU RESGATAR) -->
+<div id="investModal" class="modal">
+  <div class="modal-content">
+    <h2 id="investModalTitle" style="margin-bottom:16px;">Investir</h2>
+    <form onsubmit="handleInvestAction(event)">
+      <div class="field"><label>Valor (Yinporion)</label><input id="investAmountInput" type="number" step="0.01" min="0.01" required></div>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button type="button" class="btn alt" onclick="closeInvestModal()" style="flex:1;">Cancelar</button>
+        <button class="btn" style="flex:1;">Confirmar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- SCRIPT COM FIREBASE FIRESTORE INTEGRADO -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // COLE AQUI AS SUAS CREDENCIAIS REAIS DO FIREBASE
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_AUTH_DOMAIN",
+    projectId: "SEU_PROJECT_ID",
+    storageBucket: "SEU_STORAGE_BUCKET",
+    messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+    appId: "SEU_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const docRef = doc(db, "banco", "dados_gerais");
+
+  let accounts = {};
+  let currentUser = localStorage.getItem('ympori_session') || null;
+  let pendingTransferData = null;
+  let investActionType = 'invest';
+  let isInitialLoad = true;
+
+  // Sincronização em tempo real com o Firestore
+  onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      accounts = docSnap.data();
+    } else {
+      // Cria a base inicial caso o banco na nuvem esteja vazio
+      accounts = {
+        'ADM': {
+          name: 'Administrador',
+          pass: 'vagalume',
+          code: 'YMP-0000',
+          balance: Infinity,
+          investedBalance: 0,
+          lastYield: 0,
+          avatarLetter: 'A',
+          customColor: '#8b7cff',
+          isAdmin: true,
+          cardNum: '9999',
+          transactions: [],
+          notifications: []
         }
+      };
+      saveAccounts();
+    }
 
-        // Ouvir alterações em tempo real vindas do Firestore (celular ou PC)
-        onSnapshot(docRef, (docSnap) => {
-            const statusEl = document.getElementById("syncStatus");
-            if (docSnap.exists()) {
-                dadosApp = docSnap.data();
-                atualizarInterface();
-                statusEl.innerText = "Sincronizado em tempo real ✨";
-            } else {
-                // Se o documento ainda não existir na nuvem, cria o inicial
-                salvarNaNuvem();
-                statusEl.innerText = "Conta inicializada na nuvem.";
-            }
-        }, (error) => {
-            console.error("Erro ao sincronizar: ", error);
-            document.getElementById("syncStatus").innerText = "Erro de sincronização.";
-        });
+    initDB();
+    if (isInitialLoad) {
+      isInitialLoad = false;
+      loadApp();
+    } else if (currentUser) {
+      loadApp(); // Atualiza a tela automaticamente se o outro dispositivo alterar algo
+    }
+  }, (error) => {
+    console.error("Erro na sincronização do Firebase: ", error);
+    toast("Erro ao sincronizar com a nuvem.");
+  });
 
-        // Salvar dados atualizados no Firestore
-        async function salvarNaNuvem() {
-            try {
-                await setDoc(docRef, dadosApp);
-            } catch (e) {
-                console.error("Erro ao salvar dados: ", e);
-            }
-        }
+  function saveAccounts() {
+    setDoc(docRef, accounts).catch((e) => {
+      console.error("Erro ao salvar no Firestore: ", e);
+    });
+  }
 
-        // Funções de Ação do Usuário
-        window.adicionarSaldo = function() {
-            const input = document.getElementById("valorInput");
-            const valor = parseFloat(input.value);
+  function initDB() {
+    if (!accounts['ADM'] || accounts['ADM'].investedBalance === undefined) {
+      accounts['ADM'] = {
+        name: 'Administrador',
+        pass: 'vagalume',
+        code: 'YMP-0000',
+        balance: Infinity,
+        investedBalance: 0,
+        lastYield: 0,
+        avatarLetter: 'A',
+        customColor: '#8b7cff',
+        isAdmin: true,
+        cardNum: '9999',
+        transactions: [],
+        notifications: []
+      };
+      saveAccounts();
+    }
+  }
 
-            if (isNaN(valor) || valor <= 0) {
-                alert("Por favor, digite um valor válido.");
-                return;
-            }
+  window.switchAuthTab = function(tab) {
+    if (tab === 'login') {
+      document.getElementById('formLogin').style.display = 'grid';
+      document.getElementById('formRegister').style.display = 'none';
+      document.getElementById('tabLogin').classList.add('active');
+      document.getElementById('tabRegister').classList.remove('active');
+    } else {
+      document.getElementById('formLogin').style.display = 'none';
+      document.getElementById('formRegister').style.display = 'grid';
+      document.getElementById('tabRegister').classList.add('active');
+      document.getElementById('tabLogin').classList.remove('active');
+    }
+  };
 
-            dadosApp.saldo += valor;
-            input.value = "";
-            salvarNaNuvem();
-        };
+  window.handleRegister = function(e) {
+    e.preventDefault();
+    const name = document.getElementById('regName').value.trim();
+    const user = document.getElementById('regUser').value.trim();
+    const pass = document.getElementById('regPass').value.trim();
 
-        window.zerarSaldo = function() {
-            if (confirm("Tem certeza que deseja zerar a conta?")) {
-                dadosApp.saldo = 0;
-                salvarNaNuvem();
-            }
-        };
-    </script>
-</body>
-</html>
+    if (accounts[user]) {
+      toast('Usuário já existe!');
+      return;
+    }
+
+    const randomCode = 'YMP-' + Math.floor(1000 + Math.random() * 9000);
+    const randomCard = Math.floor(1000 + Math.random() * 9000).toString();
+
+    accounts[user] = {
+      name: name,
+      pass: pass,
+      code: randomCode,
+      balance: 500.00,
+      in
