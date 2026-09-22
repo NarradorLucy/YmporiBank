@@ -42,6 +42,11 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 
 @media(max-width:800px){.sidebar{display:none}.content{margin:0;width:100%;padding:22px 16px 85px}.grid{grid-template-columns:1fr}.balance,.transactions{grid-column:span 1}.mobilebar{display:flex;position:fixed;bottom:0;left:0;right:0;background:#0d1220;border-top:1px solid #252d42;z-index:10;justify-content:space-around;padding:9px}.mobilebar button{background:none;border:0;color:var(--muted);font-size:11px}.mobilebar button.active{color:#fff}}
 </style>
+
+<!-- SCRIPTS DO FIREBASE COMPATÍVEIS -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
 </head>
 <body>
 
@@ -253,11 +258,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 
 <div id="toast" class="toast"></div>
 
-<!-- CONFIGURAÇÃO DO FIREBASE COM AS SUAS CHAVES -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, get, set, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyCOuHI6De9YdzuGDpceEcvhCFVNl6oxsDg",
   authDomain: "ymporibank.firebaseapp.com",
@@ -269,9 +270,11 @@ const firebaseConfig = {
   databaseURL: "https://ymporibank-default-rtdb.firebaseio.com"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const dbRef = ref(db);
+// Inicialização segura
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
 
 let accounts = {};
 let currentUser = localStorage.getItem('ympori_session') || null;
@@ -280,24 +283,24 @@ let investActionType = 'invest';
 
 async function fetchAccountsFromCloud() {
   try {
-    const snapshot = await get(child(dbRef, 'accounts'));
+    const snapshot = await db.ref('accounts').once('value');
     if (snapshot.exists()) {
       accounts = snapshot.val();
     } else {
       accounts = {};
     }
   } catch (error) {
-    console.error("Erro ao carregar dados do Firebase:", error);
-    toast("Erro de conexão com o banco em nuvem!");
+    console.error("Erro no Firebase:", error);
+    toast("Erro ao conectar no banco em nuvem!");
   }
 }
 
 async function saveAccountsToCloud() {
   try {
-    await set(ref(db, 'accounts'), accounts);
+    await db.ref('accounts').set(accounts);
   } catch (error) {
     console.error("Erro ao salvar no Firebase:", error);
-    toast("Erro ao sincronizar com a nuvem!");
+    toast("Erro ao sincronizar dados!");
   }
 }
 
@@ -323,7 +326,7 @@ async function initDB() {
   }
 }
 
-window.switchAuthTab = function(tab) {
+function switchAuthTab(tab) {
   if (tab === 'login') {
     document.getElementById('formLogin').style.display = 'grid';
     document.getElementById('formRegister').style.display = 'none';
@@ -337,7 +340,7 @@ window.switchAuthTab = function(tab) {
   }
 }
 
-window.handleRegister = async function(e) {
+async function handleRegister(e) {
   e.preventDefault();
   const name = document.getElementById('regName').value.trim();
   const user = document.getElementById('regUser').value.trim();
@@ -373,13 +376,13 @@ window.handleRegister = async function(e) {
   };
 
   await saveAccountsToCloud();
-  toast('Conta salva na nuvem com sucesso!');
+  toast('Conta salva com sucesso!');
   currentUser = user;
   localStorage.setItem('ympori_session', currentUser);
   loadApp();
 }
 
-window.handleLogin = async function(e) {
+async function handleLogin(e) {
   e.preventDefault();
   const user = document.getElementById('loginUser').value.trim();
   const pass = document.getElementById('loginPass').value.trim();
@@ -425,7 +428,7 @@ async function processMarketYield(acc) {
   }
 }
 
-window.logout = function() {
+function logout() {
   currentUser = null;
   localStorage.removeItem('ympori_session');
   document.getElementById('appScreen').style.display = 'none';
@@ -479,7 +482,7 @@ function loadApp() {
   renderNotifications();
 }
 
-window.renderTransactions = function() {
+function renderTransactions() {
   const acc = accounts[currentUser];
   const container = document.getElementById('txList');
   const containerFull = document.getElementById('txListFull');
@@ -526,7 +529,7 @@ window.renderTransactions = function() {
   containerFull.innerHTML = htmlFull || '<p class="label">Nenhuma transação registrada.</p>';
 }
 
-window.toggleNotifications = function() {
+function toggleNotifications() {
   const dropdown = document.getElementById('notifDropdown');
   dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
 }
@@ -551,7 +554,7 @@ function renderNotifications() {
   }
 }
 
-window.openTransferModal = function() {
+function openTransferModal() {
   document.getElementById('transferFormStep1').style.display = 'grid';
   document.getElementById('transferFormStep2').style.display = 'none';
   document.getElementById('transCode').value = '';
@@ -559,11 +562,11 @@ window.openTransferModal = function() {
   document.getElementById('transferModal').style.display = 'grid';
 }
 
-window.closeTransferModal = function() {
+function closeTransferModal() {
   document.getElementById('transferModal').style.display = 'none';
 }
 
-window.prepareTransferConfirmation = async function(e) {
+async function prepareTransferConfirmation(e) {
   e.preventDefault();
   const code = document.getElementById('transCode').value.trim();
   const amount = parseFloat(document.getElementById('transAmount').value);
@@ -605,12 +608,12 @@ window.prepareTransferConfirmation = async function(e) {
   document.getElementById('transferFormStep2').style.display = 'block';
 }
 
-window.backToTransferStep1 = function() {
+function backToTransferStep1() {
   document.getElementById('transferFormStep1').style.display = 'grid';
   document.getElementById('transferFormStep2').style.display = 'none';
 }
 
-window.executeConfirmedTransfer = async function() {
+async function executeConfirmedTransfer() {
   if (!pendingTransferData) return;
   
   await fetchAccountsFromCloud();
@@ -657,18 +660,18 @@ window.executeConfirmedTransfer = async function() {
   loadApp();
 }
 
-window.openInvestModal = function(type) {
+function openInvestModal(type) {
   investActionType = type;
   document.getElementById('investModalTitle').textContent = type === 'invest' ? 'Investir Saldo' : 'Resgatar do Investimento';
   document.getElementById('investAmountInput').value = '';
   document.getElementById('investModal').style.display = 'grid';
 }
 
-window.closeInvestModal = function() {
+function closeInvestModal() {
   document.getElementById('investModal').style.display = 'none';
 }
 
-window.handleInvestAction = async function(e) {
+async function handleInvestAction(e) {
   e.preventDefault();
   const amount = parseFloat(document.getElementById('investAmountInput').value);
   
@@ -703,7 +706,7 @@ window.handleInvestAction = async function(e) {
   loadApp();
 }
 
-window.handleSaveProfileCustomization = async function(e) {
+async function handleSaveProfileCustomization(e) {
   e.preventDefault();
   const newName = document.getElementById('customProfileName').value.trim();
   const newLetter = document.getElementById('customAvatarLetter').value.trim().toUpperCase();
@@ -719,7 +722,7 @@ window.handleSaveProfileCustomization = async function(e) {
   }
 }
 
-window.handleSaveSettings = async function(e) {
+async function handleSaveSettings(e) {
   e.preventDefault();
   const newName = document.getElementById('setProfileName').value.trim();
   if (newName) {
@@ -730,7 +733,7 @@ window.handleSaveSettings = async function(e) {
   }
 }
 
-window.showPage = function(id, btn) {
+function showPage(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav button, .mobilebar button').forEach(b => b.classList.remove('active'));
@@ -738,14 +741,13 @@ window.showPage = function(id, btn) {
   window.scrollTo(0, 0);
 }
 
-window.toast = function(msg) {
+function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.style.display = 'block';
   setTimeout(() => t.style.display = 'none', 2200);
 }
 
-// Fechamento seguro do menu de notificações
 window.addEventListener('click', function(event) {
   const e = event || window.event;
   if (e && e.target && !e.target.closest('.notification-bell')) {
@@ -754,10 +756,10 @@ window.addEventListener('click', function(event) {
   }
 });
 
-(async function startup() {
+window.onload = async function() {
   await initDB();
   loadApp();
-})();
+};
 </script>
 </body>
 </html>
