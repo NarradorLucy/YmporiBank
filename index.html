@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -88,7 +88,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
     <h1><span id="displayUserName">--</span> <small id="displayUserCode" style="font-size:16px; color:var(--accent); margin-left: 8px;"></small></h1>
   </div>
   <div class="top-user-actions">
-    <!-- Sistema de Notificações -->
     <div class="notification-bell" onclick="toggleNotifications()" title="Notificações">
       🔔
       <span id="notifBadge" class="notification-badge">0</span>
@@ -129,7 +128,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 </div>
 </section>
 
-<!-- SEÇÃO DE INVESTIMENTOS COM RENDIMENTO -76% A +100% -->
 <section id="investments" class="page">
 <div class="top"><div><div class="label">Ympori Bank</div><h1>Área de Investimentos</h1></div></div>
 <div class="grid">
@@ -145,7 +143,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
   <div class="card">
     <div class="label">Regra de Mercado</div>
     <p style="font-size: 13px; color: var(--muted); margin-top: 10px; line-height: 1.5;">
-      O mercado Ympori é altamente volátil. Sempre que você entra na sua conta, seus investimentos sofrem uma variação aleatória entre <strong>-76%</strong> e <strong>+100%</strong>.
+      O mercado Ympori é highly volátil. Sempre que você entra na sua conta, seus investimentos sofrem uma variação aleatória entre <strong>-76%</strong> e <strong>+100%</strong>.
     </p>
   </div>
 </div>
@@ -166,7 +164,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 </div>
 </section>
 
-<!-- SEÇÃO DE PERFIL COM PERSONALIZAÇÃO -->
 <section id="profile" class="page">
 <div class="top"><div><div class="label">Conta</div><h1>Meu perfil</h1></div></div>
 <div class="grid">
@@ -212,7 +209,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 <button onclick="showPage('profile',this)">◉<br>Perfil</button>
 </div>
 
-<!-- MODAL DE CONFIRMAÇÃO DE TRANSFERÊNCIA -->
 <div id="transferModal" class="modal">
   <div class="modal-content">
     <h2 style="margin-bottom:16px;">Transferir Yinporion</h2>
@@ -225,7 +221,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
       </div>
     </form>
 
-    <!-- Tela de Revisão/Confirmação -->
     <div id="transferFormStep2" style="display:none; margin-top:10px;">
       <p class="label" style="margin-bottom:12px;">Por favor, confirme os dados da transferência:</p>
       <div style="background:var(--panel2); padding:12px; border-radius:10px; margin-bottom:15px; font-size:14px; display:grid; gap:6px;">
@@ -241,7 +236,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
   </div>
 </div>
 
-<!-- MODAL DE INVESTIMENTO (APLICAR OU RESGATAR) -->
 <div id="investModal" class="modal">
   <div class="modal-content">
     <h2 id="investModalTitle" style="margin-bottom:16px;">Investir</h2>
@@ -257,6 +251,25 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 
 <div id="toast" class="toast"></div>
 
+<!-- INTEGRAÇÃO DO FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOuHI6De9YdzuGDpceEcvhCFVNl6oxsDg",
+    authDomain: "ymporibank.firebaseapp.com",
+    projectId: "ymporibank",
+    storageBucket: "ymporibank.firebasestorage.app",
+    messagingSenderId: "1055800471223",
+    appId: "1:1055800471223:web:5354cab54f7c8056672732",
+    measurementId: "G-XH42FM6NW1"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
 <script>
 let accounts = JSON.parse(localStorage.getItem('ympori_accounts')) || {};
 let currentUser = localStorage.getItem('ympori_session') || null;
@@ -264,7 +277,6 @@ let pendingTransferData = null;
 let investActionType = 'invest';
 
 function initDB() {
-  // Se o ADM não existir ou faltar propriedades novas nas contas antigas, recria/atualiza com segurança
   if (!accounts['ADM'] || accounts['ADM'].investedBalance === undefined) {
     accounts['ADM'] = {
       name: 'Administrador',
@@ -355,7 +367,6 @@ function handleLogin(e) {
   currentUser = user;
   localStorage.setItem('ympori_session', currentUser);
   
-  // Garantir que propriedades novas existam caso a conta seja antiga
   if (accounts[currentUser].investedBalance === undefined) {
     accounts[currentUser].investedBalance = 0;
     accounts[currentUser].lastYield = 0;
@@ -364,13 +375,11 @@ function handleLogin(e) {
     accounts[currentUser].notifications = [];
   }
 
-  // APLICAR RENDIMENTO ALEATÓRIO AO ENTRAR (-76% a +100%)
   processMarketYield(accounts[currentUser]);
 
   loadApp();
 }
 
-// Lógica de Rendimento Variável ao Entrar na Conta (-76% a +100%)
 function processMarketYield(acc) {
   if (acc.investedBalance && acc.investedBalance > 0) {
     const randomPercent = Math.floor(Math.random() * (100 - (-76) + 1)) + (-76);
@@ -714,4 +723,3 @@ loadApp();
 </script>
 </body>
 </html>
-
