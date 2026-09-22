@@ -62,14 +62,14 @@ input:focus,select:focus{border-color:var(--accent)}
   <form id="formLogin" onsubmit="handleLogin(event)">
     <div class="field"><label>Usuário</label><input id="loginUser" required></div>
     <div class="field"><label>Senha</label><input id="loginPass" type="password" required></div>
-    <button class="btn" style="margin-top:6px;">Entrar</button>
+    <button class="btn" style="margin-top:6px;" type="submit">Entrar</button>
   </form>
 
   <form id="formRegister" onsubmit="handleRegister(event)" style="display:none;">
     <div class="field"><label>Nome</label><input id="regName" required></div>
     <div class="field"><label>Usuário</label><input id="regUser" required></div>
     <div class="field"><label>Senha</label><input id="regPass" type="password" required></div>
-    <button class="btn" style="margin-top:6px;">Criar Conta</button>
+    <button class="btn" style="margin-top:6px;" type="submit">Criar Conta</button>
   </form>
 </div>
 
@@ -107,7 +107,7 @@ input:focus,select:focus{border-color:var(--accent)}
     <div id="txList"></div>
   </div>
 </div>
-<div class="card"><div class="label">Investimentos</div><div class="amount positive">+0,0.0%</div><div class="label">Rendimento diário</div></div>
+<div class="card"><div class="label">Investimentos</div><div class="amount positive">+0.0%</div><div class="label">Rendimento diário</div></div>
 </div>
 </section>
 
@@ -128,8 +128,8 @@ input:focus,select:focus{border-color:var(--accent)}
 <div class="top"><div><div class="label">Configurações</div><h1>Meu Perfil</h1></div></div>
 <div class="card">
 <form onsubmit="handleUpdateProfile(event)">
-<div class="field"><label>Nome de Exibição</label><input id="profileNameInput"></div>
-<button class="btn">Salvar Alterações</button>
+<div class="field"><label>Nome de Exibição</label><input id="profileNameInput" required></div>
+<button class="btn" type="submit">Salvar Alterações</button>
 </form>
 </div>
 </section>
@@ -151,7 +151,7 @@ input:focus,select:focus{border-color:var(--accent)}
       <div class="field"><label>Valor (Yinporion)</label><input id="transVal" type="number" step="0.01" min="0.01" required></div>
       <div style="display:flex; gap:10px; margin-top:6px;">
         <button type="button" class="btn alt" onclick="closeTransferModal()" style="flex:1;">Cancelar</button>
-        <button class="btn" style="flex:1;">Enviar</button>
+        <button class="btn" type="submit" style="flex:1;">Enviar</button>
       </div>
     </form>
   </div>
@@ -159,7 +159,7 @@ input:focus,select:focus{border-color:var(--accent)}
 
 <div id="toast" class="toast"></div>
 
-<!-- Integração do Firebase Firestore -->
+<!-- Integração do Firebase Firestore com funções expostas globalmente -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -211,7 +211,7 @@ input:focus,select:focus{border-color:var(--accent)}
     setDoc(docRef, accounts).catch(e => console.error("Erro ao salvar:", e));
   }
 
-  window.switchAuthTab = function(tab) {
+  function switchAuthTab(tab) {
     if (tab === 'login') {
       document.getElementById('formLogin').style.display = 'grid';
       document.getElementById('formRegister').style.display = 'none';
@@ -223,9 +223,9 @@ input:focus,select:focus{border-color:var(--accent)}
       document.getElementById('tabRegister').classList.add('active');
       document.getElementById('tabLogin').classList.remove('active');
     }
-  };
+  }
 
-  window.handleRegister = function(e) {
+  function handleRegister(e) {
     e.preventDefault();
     const name = document.getElementById('regName').value.trim();
     const user = document.getElementById('regUser').value.trim();
@@ -249,9 +249,9 @@ input:focus,select:focus{border-color:var(--accent)}
     localStorage.setItem('yinporion_session', currentUser);
     toast('Conta criada com sucesso!');
     loadApp();
-  };
+  }
 
-  window.handleLogin = function(e) {
+  function handleLogin(e) {
     e.preventDefault();
     const user = document.getElementById('loginUser').value.trim();
     const pass = document.getElementById('loginPass').value.trim();
@@ -264,14 +264,14 @@ input:focus,select:focus{border-color:var(--accent)}
     currentUser = user;
     localStorage.setItem('yinporion_session', currentUser);
     loadApp();
-  };
+  }
 
-  window.logout = function() {
+  function logout() {
     currentUser = null;
     localStorage.removeItem('yinporion_session');
     document.getElementById('appScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'block';
-  };
+  }
 
   function loadApp() {
     if (!currentUser || !accounts[currentUser]) {
@@ -297,7 +297,7 @@ input:focus,select:focus{border-color:var(--accent)}
     renderTransactions();
   }
 
-  window.renderTransactions = function() {
+  function renderTransactions() {
     if (!currentUser || !accounts[currentUser]) return;
     const acc = accounts[currentUser];
     const txs = acc.transactions || [];
@@ -329,12 +329,12 @@ input:focus,select:focus{border-color:var(--accent)}
         </div>`;
     });
     document.getElementById('txListFull').innerHTML = htmlFull || '<p class="label">Nenhum registro no extrato.</p>';
-  };
+  }
 
-  window.openTransferModal = function() { document.getElementById('transferModal').style.display = 'grid'; };
-  window.closeTransferModal = function() { document.getElementById('transferModal').style.display = 'none'; };
+  function openTransferModal() { document.getElementById('transferModal').style.display = 'grid'; }
+  function closeTransferModal() { document.getElementById('transferModal').style.display = 'none'; }
 
-  window.handleTransfer = function(e) {
+  function handleTransfer(e) {
     e.preventDefault();
     const dest = document.getElementById('transDest').value.trim();
     const val = parseFloat(document.getElementById('transVal').value);
@@ -356,9 +356,9 @@ input:focus,select:focus{border-color:var(--accent)}
     closeTransferModal();
     toast('Transferência efetuada com sucesso!');
     loadApp();
-  };
+  }
 
-  window.handleUpdateProfile = function(e) {
+  function handleUpdateProfile(e) {
     e.preventDefault();
     const newName = document.getElementById('profileNameInput').value.trim();
     if (newName) {
@@ -367,21 +367,33 @@ input:focus,select:focus{border-color:var(--accent)}
       toast('Perfil atualizado!');
       loadApp();
     }
-  };
+  }
 
-  window.showPage = function(id, btn) {
+  function showPage(id, btn) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     document.querySelectorAll('.nav button, .mobilebar button').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
-  };
+  }
 
-  window.toast = function(msg) {
+  function toast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.style.display = 'block';
     setTimeout(() => t.style.display = 'none', 2000);
-  };
+  }
+
+  // Expondo funções globalmente para o HTML conseguir acioná-las
+  window.switchAuthTab = switchAuthTab;
+  window.handleRegister = handleRegister;
+  window.handleLogin = handleLogin;
+  window.logout = logout;
+  window.openTransferModal = openTransferModal;
+  window.closeTransferModal = closeTransferModal;
+  window.handleTransfer = handleTransfer;
+  window.handleUpdateProfile = handleUpdateProfile;
+  window.showPage = showPage;
+  window.toast = toast;
 </script>
 </body>
 </html>
