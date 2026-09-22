@@ -1,102 +1,224 @@
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-  import { 
-    getAuth, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    onAuthStateChanged,
-    signOut 
-  } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCOuHI6De9YdzuGDpceEcvhCFVNl6oxsDg",
-    authDomain: "ymporibank.firebaseapp.com",
-    databaseURL: "https://ymporibank-default-rtdb.firebaseio.com",
-    projectId: "ymporibank",
-    storageBucket: "ymporibank.firebasestorage.app",
-    messagingSenderId: "1055800471223",
-    appId: "1:1055800471223:web:cd68cad01511ce74672732",
-    measurementId: "G-EDBEXSDFE7"
-  };
-
-  // Inicializa o app e o serviço de autenticação
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  /**
-   * Cadastrar um novo usuário
-   */
-  async function cadastrarUsuario(email, senha) {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
-      console.log("Usuário criado com sucesso:", userCredential.user);
-      return userCredential.user;
-    } catch (error) {
-      console.error("Erro ao cadastrar:", error.code, error.message);
-      alert(tratarErroFirebase(error.code));
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ympori Bank</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
     }
-  }
-
-  /**
-   * Fazer login de usuário existente
-   */
-  async function fazerLogin(email, senha) {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-      console.log("Login realizado com sucesso:", userCredential.user);
-      return userCredential.user;
-    } catch (error) {
-      console.error("Erro ao fazer login:", error.code, error.message);
-      alert(tratarErroFirebase(error.code));
+    .form-group {
+      margin-bottom: 15px;
     }
-  }
-
-  /**
-   * Fazer logout
-   */
-  async function fazerLogout() {
-    try {
-      await signOut(auth);
-      console.log("Usuário desconectado");
-    } catch (error) {
-      console.error("Erro ao desconectar:", error);
+    label {
+      display: block;
+      margin-bottom: 5px;
     }
-  }
-
-  /**
-   * Monitorar o estado da autenticação (Sessão do Usuário)
-   * Executado automaticamente ao recarregar a página ou mudar o estado de login
-   */
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("Usuário atualmente conectado:", user.email, "UID:", user.uid);
-      // Aqui você pode redirecionar para a página principal ou exibir o painel
-    } else {
-      console.log("Nenhum usuário conectado.");
-      // Exibir formulário de login
+    input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
     }
-  });
-
-  // Utilitário para tratar mensagens de erro comuns em português
-  function tratarErroFirebase(code) {
-    switch (code) {
-      case 'auth/email-already-in-use':
-        return "Este e-mail já está em uso.";
-      case 'auth/invalid-email':
-        return "Formato de e-mail inválido.";
-      case 'auth/weak-password':
-        return "A senha deve ter pelo menos 6 caracteres.";
-      case 'auth/user-not-found':
-      case 'auth/wrong-password':
-      case 'auth/invalid-credential':
-        return "E-mail ou senha incorretos.";
-      default:
-        return "Ocorreu um erro ao processar a solicitação.";
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
-  }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .logout-btn {
+      background-color: #dc3545;
+      margin-top: 10px;
+    }
+    .logout-btn:hover {
+      background-color: #c82333;
+    }
+    hr {
+      margin: 25px 0;
+    }
+  </style>
+</head>
+<body>
 
-  // Torna as funções acessíveis globalmente para vincular aos formulários HTML
-  window.cadastrarUsuario = cadastrarUsuario;
-  window.fazerLogin = fazerLogin;
-  window.fazerLogout = fazerLogout;
-</script>
+  <h2>Autenticação Ympori Bank</h2>
+
+  <!-- Status da Sessão -->
+  <div id="user-info" style="margin-bottom: 20px;">
+    <p>Status: <strong id="status-text">Carregando...</strong></p>
+    <button id="btn-logout" class="logout-btn" onclick="fazerLogout()" style="display: none;">Sair</button>
+  </div>
+
+  <hr>
+
+  <!-- Formulário de Cadastro -->
+  <h3>Cadastrar</h3>
+  <form onsubmit="event.preventDefault(); cadastrarUsuario(document.getElementById('cad-email').value, document.getElementById('cad-senha').value);">
+    <div class="form-group">
+      <label for="cad-email">E-mail</label>
+      <input type="email" id="cad-email" placeholder="seu@email.com" required>
+    </div>
+    <div class="form-group">
+      <label for="cad-senha">Senha</label>
+      <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres" required minlength="6">
+    </div>
+    <button type="submit">Cadastrar Conta</button>
+  </form>
+
+  <hr>
+
+  <!-- Formulário de Login -->
+  <h3>Entrar</h3>
+  <form onsubmit="event.preventDefault(); fazerLogin(document.getElementById('login-email').value, document.getElementById('login-senha').value);">
+    <div class="form-group">
+      <label for="login-email">E-mail</label>
+      <input type="email" id="login-email" placeholder="seu@email.com" required>
+    </div>
+    <div class="form-group">
+      <label for="login-senha">Senha</label>
+      <input type="password" id="login-senha" placeholder="Sua senha" required>
+    </div>
+    <button type="submit">Entrar</button>
+  </form>
+
+  <!-- Firebase Script SDK v12 Modular -->
+  <script type="module">
+    // Importação dos serviços do Firebase SDK v12
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged,
+      signOut,
+      connectAuthEmulator 
+    } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      connectFirestoreEmulator 
+    } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+    // Configuração da aplicação Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCOuHI6De9YdzuGDpceEcvhCFVNl6oxsDg",
+      authDomain: "ymporibank.firebaseapp.com",
+      databaseURL: "https://ymporibank-default-rtdb.firebaseio.com",
+      projectId: "ymporibank",
+      storageBucket: "ymporibank.firebasestorage.app",
+      messagingSenderId: "1055800471223",
+      appId: "1:1055800471223:web:cd68cad01511ce74672732",
+      measurementId: "G-EDBEXSDFE7"
+    };
+
+    // Inicialização da instância do Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Conexão automática aos Emuladores do Firebase se estiver em localhost
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      connectAuthEmulator(auth, "http://localhost:9099");
+      connectFirestoreEmulator(db, "localhost", 8080);
+      console.log("Modo de Desenvolvimento: Conectado aos emuladores locais do Firebase.");
+    }
+
+    /**
+     * Função para cadastrar um novo usuário
+     */
+    async function cadastrarUsuario(email, senha) {
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+        console.log("Usuário cadastrado:", userCredential.user);
+        alert("Conta criada com sucesso!");
+        return userCredential.user;
+      } catch (error) {
+        console.error("Erro no cadastro:", error.code, error.message);
+        alert(tratarErroFirebase(error.code));
+      }
+    }
+
+    /**
+     * Função para autenticar usuário existente
+     */
+    async function fazerLogin(email, senha) {
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+        console.log("Usuário logado:", userCredential.user);
+        alert("Login realizado com sucesso!");
+        return userCredential.user;
+      } catch (error) {
+        console.error("Erro no login:", error.code, error.message);
+        alert(tratarErroFirebase(error.code));
+      }
+    }
+
+    /**
+     * Função para encerrar a sessão
+     */
+    async function fazerLogout() {
+      try {
+        await signOut(auth);
+        console.log("Sessão encerrada.");
+      } catch (error) {
+        console.error("Erro ao sair:", error);
+      }
+    }
+
+    /**
+     * Observador do estado de autenticação em tempo real
+     */
+    onAuthStateChanged(auth, (user) => {
+      const statusText = document.getElementById("status-text");
+      const btnLogout = document.getElementById("btn-logout");
+
+      if (user) {
+        statusText.textContent = `Conectado como ${user.email}`;
+        btnLogout.style.display = "block";
+      } else {
+        statusText.textContent = "Não conectado";
+        btnLogout.style.display = "none";
+      }
+    });
+
+    /**
+     * Utilitário para mensagens de erro amigáveis
+     */
+    function tratarErroFirebase(code) {
+      switch (code) {
+        case 'auth/email-already-in-use':
+          return "Este e-mail já está em uso por outra conta.";
+        case 'auth/invalid-email':
+          return "O formato do e-mail informado é inválido.";
+        case 'auth/weak-password':
+          return "A senha é muito fraca. Utilize pelo menos 6 caracteres.";
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          return "E-mail ou senha incorretos.";
+        default:
+          return "Ocorreu um erro ao processar a autenticação.";
+      }
+    }
+
+    // Exposição das funções e serviços para escopo global do navegador
+    window.firebaseApp = app;
+    window.auth = auth;
+    window.db = db;
+    window.cadastrarUsuario = cadastrarUsuario;
+    window.fazerLogin = fazerLogin;
+    window.fazerLogout = fazerLogout;
+  </script>
+</body>
+</html>
