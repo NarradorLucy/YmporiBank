@@ -52,17 +52,17 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
     <button id="tabRegister" onclick="switchAuthTab('register')">Cadastrar</button>
   </div>
   
-  <form id="formLogin">
+  <form id="formLogin" onsubmit="handleLogin(event)">
     <div class="field"><label>Login / Usuário</label><input id="loginUser" required></div>
     <div class="field"><label>Senha</label><input id="loginPass" type="password" required></div>
-    <button type="submit" id="btnLogin" class="btn" style="margin-top: 10px;">Entrar</button>
+    <button class="btn" style="margin-top: 10px;">Entrar</button>
   </form>
 
-  <form id="formRegister" style="display:none;">
+  <form id="formRegister" onsubmit="handleRegister(event)" style="display:none;">
     <div class="field"><label>Nome de Exibição</label><input id="regName" required></div>
     <div class="field"><label>Login / Usuário</label><input id="regUser" required></div>
-    <div class="field"><label>Senha</label><input id="regPass" type="password" minlength="6" required></div>
-    <button type="submit" id="btnRegister" class="btn" style="margin-top: 10px;">Criar Conta (+500,00 Yinporion)</button>
+    <div class="field"><label>Senha</label><input id="regPass" type="password" required></div>
+    <button class="btn" style="margin-top: 10px;">Criar Conta (+500,00 Yinporion)</button>
   </form>
 </div>
 
@@ -88,6 +88,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
     <h1><span id="displayUserName">--</span> <small id="displayUserCode" style="font-size:16px; color:var(--accent); margin-left: 8px;"></small></h1>
   </div>
   <div class="top-user-actions">
+    <!-- Sistema de Notificações -->
     <div class="notification-bell" onclick="toggleNotifications()" title="Notificações">
       🔔
       <span id="notifBadge" class="notification-badge">0</span>
@@ -128,6 +129,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 </div>
 </section>
 
+<!-- SEÇÃO DE INVESTIMENTOS COM RENDIMENTO -76% A +100% -->
 <section id="investments" class="page">
 <div class="top"><div><div class="label">Ympori Bank</div><h1>Área de Investimentos</h1></div></div>
 <div class="grid">
@@ -164,6 +166,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 </div>
 </section>
 
+<!-- SEÇÃO DE PERFIL COM PERSONALIZAÇÃO -->
 <section id="profile" class="page">
 <div class="top"><div><div class="label">Conta</div><h1>Meu perfil</h1></div></div>
 <div class="grid">
@@ -179,7 +182,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
   </div>
   <div class="card">
     <h2>Personalizar Perfil</h2>
-    <form id="formProfileCustom" style="margin-top:15px;">
+    <form onsubmit="handleSaveProfileCustomization(event)" style="margin-top:15px;">
       <div class="field"><label>Nome de Exibição</label><input id="customProfileName" required></div>
       <div class="field"><label>Sua Inicial / Letra do Avatar</label><input id="customAvatarLetter" maxlength="2" required></div>
       <div class="field"><label>Cor de Destaque do Perfil</label><input type="color" id="customColor" value="#8b7cff" style="height:45px; padding:4px; cursor:pointer;"></div>
@@ -192,7 +195,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 <section id="settings" class="page">
 <div class="top"><div><div class="label">Ympori Bank</div><h1>Configurações</h1></div></div>
 <div class="card">
-<form id="formSettings">
+<form onsubmit="handleSaveSettings(event)">
 <div class="field"><label>Nome exibido</label><input id="setProfileName"></div>
 <button class="btn">Salvar alterações</button>
 </form>
@@ -209,11 +212,11 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 <button onclick="showPage('profile',this)">◉<br>Perfil</button>
 </div>
 
-<!-- MODAIS -->
+<!-- MODAL DE CONFIRMAÇÃO DE TRANSFERÊNCIA -->
 <div id="transferModal" class="modal">
   <div class="modal-content">
     <h2 style="margin-bottom:16px;">Transferir Yinporion</h2>
-    <form id="transferFormStep1">
+    <form id="transferFormStep1" onsubmit="prepareTransferConfirmation(event)">
       <div class="field"><label>Código do Destinatário (ex: YMP-1234)</label><input id="transCode" placeholder="YMP-XXXX" required></div>
       <div class="field"><label>Valor (Yinporion)</label><input id="transAmount" type="number" step="0.01" min="0.01" required></div>
       <div style="display:flex; gap:10px; margin-top:10px;">
@@ -222,6 +225,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
       </div>
     </form>
 
+    <!-- Tela de Revisão/Confirmação -->
     <div id="transferFormStep2" style="display:none; margin-top:10px;">
       <p class="label" style="margin-bottom:12px;">Por favor, confirme os dados da transferência:</p>
       <div style="background:var(--panel2); padding:12px; border-radius:10px; margin-bottom:15px; font-size:14px; display:grid; gap:6px;">
@@ -237,10 +241,11 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
   </div>
 </div>
 
+<!-- MODAL DE INVESTIMENTO (APLICAR OU RESGATAR) -->
 <div id="investModal" class="modal">
   <div class="modal-content">
     <h2 id="investModalTitle" style="margin-bottom:16px;">Investir</h2>
-    <form id="formInvest">
+    <form onsubmit="handleInvestAction(event)">
       <div class="field"><label>Valor (Yinporion)</label><input id="investAmountInput" type="number" step="0.01" min="0.01" required></div>
       <div style="display:flex; gap:10px; margin-top:10px;">
         <button type="button" class="btn alt" onclick="closeInvestModal()" style="flex:1;">Cancelar</button>
@@ -252,463 +257,506 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 
 <div id="toast" class="toast"></div>
 
-<!-- SDK Firebase Integrado via Módulo JS -->
+<!-- MÓDULOS DE ARMAZENAMENTO NA NUVEM (FIREBASE) -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, onSnapshot, collection, query, where, getDocs, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, get, set, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCOuHI6De9YdzuGDpceEcvhCFVNl6oxsDg",
-    authDomain: "ymporibank.firebaseapp.com",
-    projectId: "ymporibank",
-    storageBucket: "ymporibank.firebasestorage.app",
-    messagingSenderId: "1055800471223",
-    appId: "1:1055800471223:web:5354cab54f7c8056672732",
-    measurementId: "G-XH42FM6NW1"
-  };
+// Configuração do Banco em Nuvem (Firebase Realtime Database)
+const firebaseConfig = {
+  databaseURL: "https://ymporibank-default-rtdb.firebaseio.com"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const dbRef = ref(db);
 
-  let currentUserData = null;
-  let currentAuthUser = null;
-  let unsubscribeUserData = null;
-  let pendingTransferData = null;
-  let investActionType = 'invest';
+let accounts = {};
+let currentUser = localStorage.getItem('ympori_session') || null;
+let pendingTransferData = null;
+let investActionType = 'invest';
 
-  function formatEmail(user) {
-    return `${user.toLowerCase().trim().replace(/[^a-z0-9]/g, '')}@ympori.com`;
+// Carrega todas as contas cadastradas na Nuvem
+async function fetchAccountsFromCloud() {
+  try {
+    const snapshot = await get(child(dbRef, 'accounts'));
+    if (snapshot.exists()) {
+      accounts = snapshot.val();
+    } else {
+      accounts = {};
+    }
+  } catch (error) {
+    console.error("Erro ao carregar dados da nuvem:", error);
+    toast("Erro ao conectar à nuvem!");
+  }
+}
+
+// Salva o objeto completo no banco em nuvem
+async function saveAccountsToCloud() {
+  try {
+    await set(ref(db, 'accounts'), accounts);
+  } catch (error) {
+    console.error("Erro ao salvar dados na nuvem:", error);
+    toast("Erro ao sincronizar com a nuvem!");
+  }
+}
+
+async function initDB() {
+  await fetchAccountsFromCloud();
+  
+  if (!accounts['ADM'] || accounts['ADM'].investedBalance === undefined) {
+    accounts['ADM'] = {
+      name: 'Administrador',
+      pass: 'vagalume',
+      code: 'YMP-0000',
+      balance: 999999999,
+      investedBalance: 0,
+      lastYield: 0,
+      avatarLetter: 'A',
+      customColor: '#8b7cff',
+      isAdmin: true,
+      cardNum: '9999',
+      transactions: [],
+      notifications: []
+    };
+    await saveAccountsToCloud();
+  }
+}
+
+window.switchAuthTab = function(tab) {
+  if (tab === 'login') {
+    document.getElementById('formLogin').style.display = 'grid';
+    document.getElementById('formRegister').style.display = 'none';
+    document.getElementById('tabLogin').classList.add('active');
+    document.getElementById('tabRegister').classList.remove('active');
+  } else {
+    document.getElementById('formLogin').style.display = 'none';
+    document.getElementById('formRegister').style.display = 'grid';
+    document.getElementById('tabRegister').classList.add('active');
+    document.getElementById('tabLogin').classList.remove('active');
+  }
+}
+
+window.handleRegister = async function(e) {
+  e.preventDefault();
+  const name = document.getElementById('regName').value.trim();
+  const user = document.getElementById('regUser').value.trim();
+  const pass = document.getElementById('regPass').value.trim();
+
+  await fetchAccountsFromCloud();
+
+  if (accounts[user]) {
+    toast('Usuário já existe!');
+    return;
   }
 
-  // Monitorar Estado da Autenticação
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      currentAuthUser = user;
-      if (unsubscribeUserData) unsubscribeUserData();
-      
-      unsubscribeUserData = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
-        if (docSnap.exists()) {
-          currentUserData = docSnap.data();
-          renderApp();
-        }
-      });
-      
-      document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('appScreen').style.display = 'flex';
-    } else {
-      currentAuthUser = null;
-      currentUserData = null;
-      if (unsubscribeUserData) unsubscribeUserData();
-      document.getElementById('appScreen').style.display = 'none';
-      document.getElementById('authScreen').style.display = 'block';
-    }
-  });
+  const randomCode = 'YMP-' + Math.floor(1000 + Math.random() * 9000);
+  const randomCard = Math.floor(1000 + Math.random() * 9000).toString();
 
-  // Alternar abas da tela de Auth
-  window.switchAuthTab = function(tab) {
-    if (tab === 'login') {
-      document.getElementById('formLogin').style.display = 'grid';
-      document.getElementById('formRegister').style.display = 'none';
-      document.getElementById('tabLogin').classList.add('active');
-      document.getElementById('tabRegister').classList.remove('active');
-    } else {
-      document.getElementById('formLogin').style.display = 'none';
-      document.getElementById('formRegister').style.display = 'grid';
-      document.getElementById('tabRegister').classList.add('active');
-      document.getElementById('tabLogin').classList.remove('active');
-    }
+  accounts[user] = {
+    name: name,
+    pass: pass,
+    code: randomCode,
+    balance: 500.00,
+    investedBalance: 0,
+    lastYield: 0,
+    avatarLetter: name.charAt(0).toUpperCase(),
+    customColor: '#8b7cff',
+    isAdmin: false,
+    cardNum: randomCard,
+    transactions: [
+      { type: 'in', title: 'Bônus de Boas-vindas', date: 'Hoje', amount: 500.00 }
+    ],
+    notifications: [
+      { text: 'Bem-vindo ao Ympori Bank! Sua conta foi criada com 500 Yinporions.', date: 'Hoje' }
+    ]
   };
 
-  // Login
-  document.getElementById('formLogin').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('btnLogin');
-    const username = document.getElementById('loginUser').value.trim();
-    const pass = document.getElementById('loginPass').value.trim();
-    const email = formatEmail(username);
+  await saveAccountsToCloud();
+  toast('Conta criada e salva na nuvem com sucesso!');
+  currentUser = user;
+  localStorage.setItem('ympori_session', currentUser);
+  loadApp();
+}
 
-    btn.textContent = 'Conectando...';
-    btn.disabled = true;
+window.handleLogin = async function(e) {
+  e.preventDefault();
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
 
-    try {
-      const userCred = await signInWithEmailAndPassword(auth, email, pass);
-      const userDocRef = doc(db, "users", userCred.user.uid);
-      const docSnap = await getDoc(userDocRef);
-      
-      if (docSnap.exists()) {
-        const acc = docSnap.data();
-        if (acc.investedBalance && acc.investedBalance > 0) {
-          const randomPercent = Math.floor(Math.random() * (100 - (-76) + 1)) + (-76);
-          const yieldAmount = acc.investedBalance * (randomPercent / 100);
-          const newInvested = Math.max(0, acc.investedBalance + yieldAmount);
-          const sign = randomPercent >= 0 ? '+' : '';
-          const textMsg = `Seu investimento rendeu ${sign}${randomPercent}% (${yieldAmount.toFixed(2)} Yinporions).`;
-          
-          await updateDoc(userDocRef, {
-            investedBalance: newInvested,
-            lastYield: randomPercent,
-            notifications: arrayUnion({ text: textMsg, date: new Date().toLocaleDateString('pt-BR') })
-          });
-        }
-      }
-      toast('Login efetuado com sucesso!');
-    } catch (err) {
-      toast('Usuário ou senha incorretos!');
-    } finally {
-      btn.textContent = 'Entrar';
-      btn.disabled = false;
-    }
-  });
+  await fetchAccountsFromCloud();
 
-  // Registro
-  document.getElementById('formRegister').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('btnRegister');
-    const name = document.getElementById('regName').value.trim();
-    const username = document.getElementById('regUser').value.trim();
-    const pass = document.getElementById('regPass').value.trim();
-    const email = formatEmail(username);
-
-    btn.textContent = 'Criando conta...';
-    btn.disabled = true;
-
-    try {
-      const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-      const uid = userCred.user.uid;
-      const randomCode = 'YMP-' + Math.floor(1000 + Math.random() * 9000);
-      const randomCard = Math.floor(1000 + Math.random() * 9000).toString();
-
-      const newUser = {
-        uid: uid,
-        username: username,
-        name: name,
-        code: randomCode,
-        balance: 500.00,
-        investedBalance: 0,
-        lastYield: 0,
-        avatarLetter: name.charAt(0).toUpperCase(),
-        customColor: '#8b7cff',
-        isAdmin: username.toUpperCase() === 'ADM',
-        cardNum: randomCard,
-        transactions: [
-          { type: 'in', title: 'Bônus de Boas-vindas', date: 'Hoje', amount: 500.00 }
-        ],
-        notifications: [
-          { text: 'Bem-vindo ao Ympori Bank! Sua conta foi criada com 500 Yinporions.', date: 'Hoje' }
-        ]
-      };
-
-      await setDoc(doc(db, "users", uid), newUser);
-      toast('Conta criada com sucesso!');
-    } catch (err) {
-      toast('Erro ao cadastrar: ' + err.message);
-    } finally {
-      btn.textContent = 'Criar Conta (+500,00 Yinporion)';
-      btn.disabled = false;
-    }
-  });
-
-  window.logout = function() {
-    signOut(auth);
-  };
-
-  function renderApp() {
-    if (!currentUserData) return;
-    const acc = currentUserData;
-
-    const accentColor = acc.customColor || '#8b7cff';
-    document.documentElement.style.setProperty('--accent', accentColor);
-
-    document.getElementById('displayUserName').textContent = acc.name;
-    document.getElementById('displayUserCode').textContent = `(${acc.code})`;
-
-    const avatarLetter = acc.avatarLetter || acc.name.charAt(0).toUpperCase();
-    document.getElementById('displayAvatar').textContent = avatarLetter;
-    document.getElementById('profileAvatarLarge').textContent = avatarLetter;
-
-    document.getElementById('displayBalance').textContent = acc.isAdmin ? 'Yinporion ∞' : `Yinporion ${acc.balance.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    document.getElementById('displayInvestedBalance').textContent = `Yinporion ${acc.investedBalance ? acc.investedBalance.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0,00'}`;
-
-    const yieldVal = acc.lastYield || 0;
-    const yieldElem = document.getElementById('displayHomeYield');
-    yieldElem.textContent = `${yieldVal >= 0 ? '+' : ''}${yieldVal}%`;
-    yieldElem.className = `amount ${yieldVal >= 0 ? 'positive' : 'negative'}`;
-    document.getElementById('lastYieldText').textContent = `Última variação de mercado: ${yieldVal >= 0 ? '+' : ''}${yieldVal}%`;
-
-    document.getElementById('displayCardNumber').textContent = `•••• ${acc.cardNum}`;
-    document.getElementById('displayCardHolder').textContent = acc.name.toUpperCase();
-    document.getElementById('displayCardNumber2').textContent = `YMPORI •••• ${acc.cardNum}`;
-    document.getElementById('displayCardHolder2').textContent = acc.name.toUpperCase();
-
-    document.getElementById('profileName').textContent = acc.name;
-    document.getElementById('profileCode').textContent = acc.code;
-    document.getElementById('setProfileName').value = acc.name;
-    document.getElementById('customProfileName').value = acc.name;
-    document.getElementById('customAvatarLetter').value = avatarLetter;
-    document.getElementById('customColor').value = accentColor;
-
-    window.renderTransactions();
-    window.renderNotifications();
+  if (!accounts[user] || accounts[user].pass !== pass) {
+    toast('Usuário ou senha incorretos!');
+    return;
   }
 
-  window.renderTransactions = function() {
-    if (!currentUserData) return;
-    const container = document.getElementById('txList');
-    const containerFull = document.getElementById('txListFull');
-    const filter = document.getElementById('txFilter') ? document.getElementById('txFilter').value : 'all';
+  currentUser = user;
+  localStorage.setItem('ympori_session', currentUser);
+  
+  if (accounts[currentUser].investedBalance === undefined) {
+    accounts[currentUser].investedBalance = 0;
+    accounts[currentUser].lastYield = 0;
+    accounts[currentUser].avatarLetter = accounts[currentUser].name.charAt(0).toUpperCase();
+    accounts[currentUser].customColor = '#8b7cff';
+    accounts[currentUser].notifications = [];
+  }
 
-    let filteredTx = currentUserData.transactions || [];
-    if (filter !== 'all') {
-      filteredTx = filteredTx.filter(tx => tx.type === filter);
-    }
+  await processMarketYield(accounts[currentUser]);
+  loadApp();
+}
 
+async function processMarketYield(acc) {
+  if (acc.investedBalance && acc.investedBalance > 0) {
+    const randomPercent = Math.floor(Math.random() * (100 - (-76) + 1)) + (-76);
+    const yieldAmount = acc.investedBalance * (randomPercent / 100);
+    
+    acc.investedBalance += yieldAmount;
+    acc.lastYield = randomPercent;
+
+    const sign = randomPercent >= 0 ? '+' : '';
+    const textMsg = `Seu investimento rendeu ${sign}${randomPercent}% (${yieldAmount.toFixed(2)} Yinporions).`;
+    
+    if (!acc.notifications) acc.notifications = [];
+    acc.notifications.unshift({ text: textMsg, date: new Date().toLocaleDateString('pt-BR') });
+    await saveAccountsToCloud();
+  } else {
+    acc.lastYield = 0;
+  }
+}
+
+window.logout = function() {
+  currentUser = null;
+  localStorage.removeItem('ympori_session');
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'block';
+}
+
+function loadApp() {
+  if (!currentUser || !accounts[currentUser]) {
+    document.getElementById('appScreen').style.display = 'none';
+    document.getElementById('authScreen').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'flex';
+
+  const acc = accounts[currentUser];
+  
+  const accentColor = acc.customColor || '#8b7cff';
+  document.documentElement.style.setProperty('--accent', accentColor);
+
+  document.getElementById('displayUserName').textContent = acc.name;
+  document.getElementById('displayUserCode').textContent = `(${acc.code})`;
+  
+  const avatarLetter = acc.avatarLetter || acc.name.charAt(0).toUpperCase();
+  document.getElementById('displayAvatar').textContent = avatarLetter;
+  document.getElementById('profileAvatarLarge').textContent = avatarLetter;
+
+  document.getElementById('displayBalance').textContent = acc.isAdmin ? 'Yinporion ∞' : `Yinporion ${acc.balance.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+  document.getElementById('displayInvestedBalance').textContent = `Yinporion ${acc.investedBalance ? acc.investedBalance.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0,00'}`;
+  
+  const yieldVal = acc.lastYield || 0;
+  const yieldElem = document.getElementById('displayHomeYield');
+  yieldElem.textContent = `${yieldVal >= 0 ? '+' : ''}${yieldVal}%`;
+  yieldElem.className = `amount ${yieldVal >= 0 ? 'positive' : 'negative'}`;
+  document.getElementById('lastYieldText').textContent = `Última variação de mercado: ${yieldVal >= 0 ? '+' : ''}${yieldVal}%`;
+
+  document.getElementById('displayCardNumber').textContent = `•••• ${acc.cardNum}`;
+  document.getElementById('displayCardHolder').textContent = acc.name.toUpperCase();
+  document.getElementById('displayCardNumber2').textContent = `YMPORI •••• ${acc.cardNum}`;
+  document.getElementById('displayCardHolder2').textContent = acc.name.toUpperCase();
+
+  document.getElementById('profileName').textContent = acc.name;
+  document.getElementById('profileCode').textContent = acc.code;
+  document.getElementById('setProfileName').value = acc.name;
+  document.getElementById('customProfileName').value = acc.name;
+  document.getElementById('customAvatarLetter').value = avatarLetter;
+  document.getElementById('customColor').value = accentColor;
+
+  renderTransactions();
+  renderNotifications();
+}
+
+window.renderTransactions = function() {
+  const acc = accounts[currentUser];
+  const container = document.getElementById('txList');
+  const containerFull = document.getElementById('txListFull');
+  const filter = document.getElementById('txFilter') ? document.getElementById('txFilter').value : 'all';
+  
+  let filteredTx = acc.transactions || [];
+  if (filter !== 'all') {
+    filteredTx = filteredTx.filter(tx => tx.type === filter);
+  }
+
+  let html = '';
+  filteredTx.slice(-5).reverse().forEach(tx => {
+    const isPositive = tx.type === 'in';
+    const sign = isPositive ? '+' : '-';
+    const classColor = isPositive ? 'positive' : '';
+    html += `
+      <div class="tx">
+        <div class="txleft">
+          <div class="icon">${isPositive ? '+' : '✦'}</div>
+          <div>${tx.title}<br><small>${tx.date}</small></div>
+        </div>
+        <strong class="${classColor}">${sign} Yinporion ${tx.amount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+      </div>
+    `;
+  });
+
+  let htmlFull = '';
+  filteredTx.slice().reverse().forEach(tx => {
+    const isPositive = tx.type === 'in';
+    const sign = isPositive ? '+' : '-';
+    const classColor = isPositive ? 'positive' : '';
+    htmlFull += `
+      <div class="tx">
+        <div class="txleft">
+          <div class="icon">${isPositive ? '+' : '✦'}</div>
+          <div>${tx.title}<br><small>${tx.date}</small></div>
+        </div>
+        <strong class="${classColor}">${sign} Yinporion ${tx.amount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html || '<p class="label">Nenhuma transação recente.</p>';
+  containerFull.innerHTML = htmlFull || '<p class="label">Nenhuma transação registrada.</p>';
+}
+
+window.toggleNotifications = function() {
+  const dropdown = document.getElementById('notifDropdown');
+  dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
+
+function renderNotifications() {
+  const acc = accounts[currentUser];
+  const notifs = acc.notifications || [];
+  const listElem = document.getElementById('notifList');
+  const badgeElem = document.getElementById('notifBadge');
+
+  if (notifs.length > 0) {
+    badgeElem.style.display = 'block';
+    badgeElem.textContent = notifs.length;
     let html = '';
-    filteredTx.slice(-5).reverse().forEach(tx => {
-      const isPositive = tx.type === 'in';
-      html += `
-        <div class="tx">
-          <div class="txleft">
-            <div class="icon">${isPositive ? '+' : '✦'}</div>
-            <div>${tx.title}<br><small>${tx.date}</small></div>
-          </div>
-          <strong class="${isPositive ? 'positive' : ''}">${isPositive ? '+' : '-'} Yinporion ${tx.amount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
-        </div>
-      `;
+    notifs.forEach(n => {
+      html += `<div class="notif-item"><strong>${n.date}</strong><br>${n.text}</div>`;
     });
+    listElem.innerHTML = html;
+  } else {
+    badgeElem.style.display = 'none';
+    listElem.innerHTML = '<p class="label">Nenhuma nova notificação</p>';
+  }
+}
 
-    let htmlFull = '';
-    filteredTx.slice().reverse().forEach(tx => {
-      const isPositive = tx.type === 'in';
-      htmlFull += `
-        <div class="tx">
-          <div class="txleft">
-            <div class="icon">${isPositive ? '+' : '✦'}</div>
-            <div>${tx.title}<br><small>${tx.date}</small></div>
-          </div>
-          <strong class="${isPositive ? 'positive' : ''}">${isPositive ? '+' : '-'} Yinporion ${tx.amount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
-        </div>
-      `;
-    });
+window.openTransferModal = function() {
+  document.getElementById('transferFormStep1').style.display = 'grid';
+  document.getElementById('transferFormStep2').style.display = 'none';
+  document.getElementById('transCode').value = '';
+  document.getElementById('transAmount').value = '';
+  document.getElementById('transferModal').style.display = 'grid';
+}
 
-    container.innerHTML = html || '<p class="label">Nenhuma transação recente.</p>';
-    containerFull.innerHTML = htmlFull || '<p class="label">Nenhuma transação registrada.</p>';
-  };
+window.closeTransferModal = function() {
+  document.getElementById('transferModal').style.display = 'none';
+}
 
-  window.toggleNotifications = function() {
+window.prepareTransferConfirmation = async function(e) {
+  e.preventDefault();
+  const code = document.getElementById('transCode').value.trim();
+  const amount = parseFloat(document.getElementById('transAmount').value);
+  
+  await fetchAccountsFromCloud();
+  const sender = accounts[currentUser];
+
+  if (amount <= 0 || isNaN(amount)) {
+    toast('Valor inválido!');
+    return;
+  }
+
+  if (!sender.isAdmin && sender.balance < amount) {
+    toast('Saldo insuficiente!');
+    return;
+  }
+
+  let recipientKey = Object.keys(accounts).find(key => accounts[key].code === code);
+
+  if (!recipientKey) {
+    toast('Código de conta não encontrado!');
+    return;
+  }
+
+  if (recipientKey === currentUser) {
+    toast('Você não pode transferir para você mesmo!');
+    return;
+  }
+
+  const recipient = accounts[recipientKey];
+
+  pendingTransferData = { recipientKey, amount };
+  
+  document.getElementById('confDestName').textContent = recipient.name;
+  document.getElementById('confDestCode').textContent = recipient.code;
+  document.getElementById('confAmount').textContent = `Yinporion ${amount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+  document.getElementById('transferFormStep1').style.display = 'none';
+  document.getElementById('transferFormStep2').style.display = 'block';
+}
+
+window.backToTransferStep1 = function() {
+  document.getElementById('transferFormStep1').style.display = 'grid';
+  document.getElementById('transferFormStep2').style.display = 'none';
+}
+
+window.executeConfirmedTransfer = async function() {
+  if (!pendingTransferData) return;
+  
+  await fetchAccountsFromCloud();
+  
+  const { recipientKey, amount } = pendingTransferData;
+  const sender = accounts[currentUser];
+  const recipient = accounts[recipientKey];
+
+  if (!sender.isAdmin) {
+    sender.balance -= amount;
+  }
+  
+  if (!recipient.isAdmin) {
+    recipient.balance += amount;
+  }
+
+  const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+
+  if (!sender.transactions) sender.transactions = [];
+  sender.transactions.push({
+    type: 'out',
+    title: `Envio p/ ${recipient.name}`,
+    date: dateStr,
+    amount: amount
+  });
+
+  if (!recipient.transactions) recipient.transactions = [];
+  recipient.transactions.push({
+    type: 'in',
+    title: `Recebido de ${sender.name}`,
+    date: dateStr,
+    amount: amount
+  });
+
+  if (!recipient.notifications) recipient.notifications = [];
+  recipient.notifications.unshift({
+    text: `Você recebeu ${amount.toLocaleString('pt-BR', {minimumFractionDigits: 2})} Yinporions de ${sender.name}.`,
+    date: dateStr
+  });
+
+  await saveAccountsToCloud();
+  closeTransferModal();
+  toast('Transferência realizada com sucesso!');
+  loadApp();
+}
+
+window.openInvestModal = function(type) {
+  investActionType = type;
+  document.getElementById('investModalTitle').textContent = type === 'invest' ? 'Investir Saldo' : 'Resgatar do Investimento';
+  document.getElementById('investAmountInput').value = '';
+  document.getElementById('investModal').style.display = 'grid';
+}
+
+window.closeInvestModal = function() {
+  document.getElementById('investModal').style.display = 'none';
+}
+
+window.handleInvestAction = async function(e) {
+  e.preventDefault();
+  const amount = parseFloat(document.getElementById('investAmountInput').value);
+  
+  await fetchAccountsFromCloud();
+  const acc = accounts[currentUser];
+
+  if (amount <= 0 || isNaN(amount)) {
+    toast('Valor inválido!');
+    return;
+  }
+
+  if (investActionType === 'invest') {
+    if (!acc.isAdmin && acc.balance < amount) {
+      toast('Saldo disponível insuficiente para investir!');
+      return;
+    }
+    if (!acc.isAdmin) acc.balance -= amount;
+    acc.investedBalance = (acc.investedBalance || 0) + amount;
+    toast('Investimento realizado com sucesso!');
+  } else {
+    if ((acc.investedBalance || 0) < amount) {
+      toast('Saldo investido insuficiente para resgate!');
+      return;
+    }
+    acc.investedBalance -= amount;
+    acc.balance += amount;
+    toast('Resgate realizado com sucesso!');
+  }
+
+  await saveAccountsToCloud();
+  closeInvestModal();
+  loadApp();
+}
+
+window.handleSaveProfileCustomization = async function(e) {
+  e.preventDefault();
+  const newName = document.getElementById('customProfileName').value.trim();
+  const newLetter = document.getElementById('customAvatarLetter').value.trim().toUpperCase();
+  const newColor = document.getElementById('customColor').value;
+
+  if (newName) {
+    accounts[currentUser].name = newName;
+    accounts[currentUser].avatarLetter = newLetter || newName.charAt(0).toUpperCase();
+    accounts[currentUser].customColor = newColor;
+    await saveAccountsToCloud();
+    toast('Perfil personalizado com sucesso!');
+    loadApp();
+  }
+}
+
+window.handleSaveSettings = async function(e) {
+  e.preventDefault();
+  const newName = document.getElementById('setProfileName').value.trim();
+  if (newName) {
+    accounts[currentUser].name = newName;
+    await saveAccountsToCloud();
+    toast('Nome alterado com sucesso!');
+    loadApp();
+  }
+}
+
+window.showPage = function(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button, .mobilebar button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+window.toast = function(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2200);
+}
+
+window.onclick = function(event) {
+  if (!event.target.closest('.notification-bell')) {
     const dropdown = document.getElementById('notifDropdown');
-    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-  };
+    if (dropdown) dropdown.style.display = 'none';
+  }
+}
 
-  window.renderNotifications = function() {
-    if (!currentUserData) return;
-    const notifs = currentUserData.notifications || [];
-    const listElem = document.getElementById('notifList');
-    const badgeElem = document.getElementById('notifBadge');
-
-    if (notifs.length > 0) {
-      badgeElem.style.display = 'block';
-      badgeElem.textContent = notifs.length;
-      let html = '';
-      notifs.forEach(n => {
-        html += `<div class="notif-item"><strong>${n.date}</strong><br>${n.text}</div>`;
-      });
-      listElem.innerHTML = html;
-    } else {
-      badgeElem.style.display = 'none';
-      listElem.innerHTML = '<p class="label">Nenhuma nova notificação</p>';
-    }
-  };
-
-  window.openTransferModal = function() {
-    document.getElementById('transferFormStep1').style.display = 'grid';
-    document.getElementById('transferFormStep2').style.display = 'none';
-    document.getElementById('transCode').value = '';
-    document.getElementById('transAmount').value = '';
-    document.getElementById('transferModal').style.display = 'grid';
-  };
-
-  window.closeTransferModal = function() {
-    document.getElementById('transferModal').style.display = 'none';
-  };
-
-  document.getElementById('transferFormStep1').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const code = document.getElementById('transCode').value.trim();
-    const amount = parseFloat(document.getElementById('transAmount').value);
-
-    if (amount <= 0 || isNaN(amount)) {
-      toast('Valor inválido!');
-      return;
-    }
-
-    if (!currentUserData.isAdmin && currentUserData.balance < amount) {
-      toast('Saldo insuficiente!');
-      return;
-    }
-
-    if (currentUserData.code === code) {
-      toast('Você não pode transferir para você mesmo!');
-      return;
-    }
-
-    const q = query(collection(db, "users"), where("code", "==", code));
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      toast('Código de conta não encontrado!');
-      return;
-    }
-
-    const recipientDoc = querySnapshot.docs[0];
-    const recipient = recipientDoc.data();
-
-    pendingTransferData = { recipientUid: recipientDoc.id, recipient, amount };
-
-    document.getElementById('confDestName').textContent = recipient.name;
-    document.getElementById('confDestCode').textContent = recipient.code;
-    document.getElementById('confAmount').textContent = `Yinporion ${amount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-
-    document.getElementById('transferFormStep1').style.display = 'none';
-    document.getElementById('transferFormStep2').style.display = 'block';
-  });
-
-  window.backToTransferStep1 = function() {
-    document.getElementById('transferFormStep1').style.display = 'grid';
-    document.getElementById('transferFormStep2').style.display = 'none';
-  };
-
-  window.executeConfirmedTransfer = async function() {
-    if (!pendingTransferData) return;
-    const { recipientUid, recipient, amount } = pendingTransferData;
-    const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-
-    try {
-      await runTransaction(db, async (transaction) => {
-        const senderRef = doc(db, "users", currentAuthUser.uid);
-        const recipientRef = doc(db, "users", recipientUid);
-
-        const senderDoc = await transaction.get(senderRef);
-        const recDoc = await transaction.get(recipientRef);
-
-        if (!senderDoc.exists() || !recDoc.exists()) throw "Documento não encontrado";
-
-        const sData = senderDoc.data();
-        const rData = recDoc.data();
-
-        if (!sData.isAdmin && sData.balance < amount) throw "Saldo insuficiente";
-
-        const newSenderBalance = sData.isAdmin ? sData.balance : sData.balance - amount;
-        const newRecipientBalance = rData.isAdmin ? rData.balance : rData.balance + amount;
-
-        const senderTx = [...(sData.transactions || []), { type: 'out', title: `Envio p/ ${rData.name}`, date: dateStr, amount }];
-        const recTx = [...(rData.transactions || []), { type: 'in', title: `Recebido de ${sData.name}`, date: dateStr, amount }];
-        const recNotif = [{ text: `Você recebeu ${amount.toLocaleString('pt-BR', {minimumFractionDigits: 2})} Yinporions de ${sData.name}.`, date: dateStr }, ...(rData.notifications || [])];
-
-        transaction.update(senderRef, { balance: newSenderBalance, transactions: senderTx });
-        transaction.update(recipientRef, { balance: newRecipientBalance, transactions: recTx, notifications: recNotif });
-      });
-
-      window.closeTransferModal();
-      toast('Transferência realizada com sucesso!');
-    } catch (err) {
-      toast('Erro na transferência: ' + err);
-    }
-  };
-
-  window.openInvestModal = function(type) {
-    investActionType = type;
-    document.getElementById('investModalTitle').textContent = type === 'invest' ? 'Investir Saldo' : 'Resgatar do Investimento';
-    document.getElementById('investAmountInput').value = '';
-    document.getElementById('investModal').style.display = 'grid';
-  };
-
-  window.closeInvestModal = function() {
-    document.getElementById('investModal').style.display = 'none';
-  };
-
-  document.getElementById('formInvest').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const amount = parseFloat(document.getElementById('investAmountInput').value);
-    const userRef = doc(db, "users", currentAuthUser.uid);
-
-    if (amount <= 0 || isNaN(amount)) {
-      toast('Valor inválido!');
-      return;
-    }
-
-    if (investActionType === 'invest') {
-      if (!currentUserData.isAdmin && currentUserData.balance < amount) {
-        toast('Saldo disponível insuficiente!');
-        return;
-      }
-      const newBalance = currentUserData.isAdmin ? currentUserData.balance : currentUserData.balance - amount;
-      const newInvested = (currentUserData.investedBalance || 0) + amount;
-      await updateDoc(userRef, { balance: newBalance, investedBalance: newInvested });
-      toast('Investimento realizado com sucesso!');
-    } else {
-      if ((currentUserData.investedBalance || 0) < amount) {
-        toast('Saldo investido insuficiente!');
-        return;
-      }
-      const newInvested = currentUserData.investedBalance - amount;
-      const newBalance = currentUserData.balance + amount;
-      await updateDoc(userRef, { balance: newBalance, investedBalance: newInvested });
-      toast('Resgate realizado com sucesso!');
-    }
-
-    window.closeInvestModal();
-  });
-
-  document.getElementById('formProfileCustom').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const newName = document.getElementById('customProfileName').value.trim();
-    const newLetter = document.getElementById('customAvatarLetter').value.trim().toUpperCase();
-    const newColor = document.getElementById('customColor').value;
-
-    if (newName) {
-      const userRef = doc(db, "users", currentAuthUser.uid);
-      await updateDoc(userRef, {
-        name: newName,
-        avatarLetter: newLetter || newName.charAt(0).toUpperCase(),
-        customColor: newColor
-      });
-      toast('Perfil personalizado com sucesso!');
-    }
-  });
-
-  document.getElementById('formSettings').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const newName = document.getElementById('setProfileName').value.trim();
-    if (newName) {
-      const userRef = doc(db, "users", currentAuthUser.uid);
-      await updateDoc(userRef, { name: newName });
-      toast('Nome alterado com sucesso!');
-    }
-  });
-
-  window.showPage = function(id, btn) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    document.querySelectorAll('.nav button, .mobilebar button').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-    window.scrollTo(0, 0);
-  };
-
-  window.toast = function(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.display = 'block';
-    setTimeout(() => t.style.display = 'none', 2200);
-  };
-
-  window.onclick = function(event) {
-    if (!event.target.closest('.notification-bell')) {
-      const dropdown = document.getElementById('notifDropdown');
-      if (dropdown) dropdown.style.display = 'none';
-    }
-  };
+// Inicialização síncrona/assíncrona da nuvem
+(async function startup() {
+  await initDB();
+  loadApp();
+})();
 </script>
 </body>
 </html>
