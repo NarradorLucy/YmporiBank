@@ -22,7 +22,6 @@
     databaseURL: "https://ymporibank-default-rtdb.firebaseio.com"
   };
 
-  // Inicializar Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
   const db = getDatabase(app);
@@ -34,7 +33,6 @@
   window.dbChild = child;
   window.dbOnValue = onValue;
 
-  // Inicializar após carregamento dos módulos
   if (window.startAppInit) {
     window.startAppInit();
   }
@@ -68,7 +66,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;place-items:center;z-index:30}
 .modal-content{background:#111728;padding:24px;border-radius:18px;border:1px solid #28314a;width:100%;max-width:400px}
 
-/* Notificações */
 .notification-bell{position:relative;cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid #2b3550;padding:10px;border-radius:12px;display:grid;place-items:center;color:var(--text)}
 .notification-badge{position:absolute;top:-5px;right:-5px;background:var(--danger);color:#fff;font-size:10px;font-weight:bold;padding:2px 6px;border-radius:10px;display:none}
 .notifications-dropdown{position:absolute;right:0;top:55px;width:320px;background:#111728;border:1px solid #28314a;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.5);display:none;z-index:50;padding:15px}
@@ -91,7 +88,7 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
   <form id="formLogin" onsubmit="handleLogin(event)">
     <div class="field"><label>Login / Usuário</label><input id="loginUser" required></div>
     <div class="field"><label>Senha</label><input id="loginPass" type="password" required></div>
-    <button class="btn" style="margin-top: 10px;">Entrar</button>
+    <button id="btnLoginSubmit" class="btn" style="margin-top: 10px;" disabled>Conectando...</button>
   </form>
 
   <form id="formRegister" onsubmit="handleRegister(event)" style="display:none;">
@@ -300,6 +297,7 @@ window.startAppInit = function() {
   window.dbOnValue(accountsRef, (snapshot) => {
     accounts = snapshot.val() || {};
 
+    // Cria a conta ADM no banco se não existir
     if (!accounts['ADM']) {
       accounts['ADM'] = {
         name: 'Administrador',
@@ -316,6 +314,13 @@ window.startAppInit = function() {
         notifications: []
       };
       saveAccounts();
+    }
+
+    // Libera o botão de entrar assim que a base de dados carregar
+    const submitBtn = document.getElementById('btnLoginSubmit');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Entrar';
     }
 
     if (currentUser && accounts[currentUser]) {
@@ -408,7 +413,6 @@ function handleLogin(e) {
   }
 
   processMarketYield(accounts[currentUser]);
-
   loadApp();
 }
 
