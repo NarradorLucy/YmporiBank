@@ -5,16 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ympori Bank</title>
 
-<!-- Firebase SDK -->
+<!-- Firebase SDKs -->
 <script type="module">
-  // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyCOuHI6De9YdzuGDpceEcvhCFVNl6oxsDg",
     authDomain: "ymporibank.firebaseapp.com",
@@ -22,12 +18,21 @@
     storageBucket: "ymporibank.firebasestorage.app",
     messagingSenderId: "1055800471223",
     appId: "1:1055800471223:web:5354cab54f7c8056672732",
-    measurementId: "G-XH42FM6NW1"
+    measurementId: "G-XH42FM6NW1",
+    databaseURL: "https://ymporibank-default-rtdb.firebaseio.com" // URL da Realtime Database
   };
 
-  // Initialize Firebase
+  // Inicializar Firebase e disponibilizar globalmente
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
+  const db = getDatabase(app);
+
+  window.db = db;
+  window.dbRef = ref;
+  window.dbSet = set;
+  window.dbGet = get;
+  window.dbChild = child;
+  window.dbOnValue = onValue;
 </script>
 
 <style>
@@ -93,7 +98,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
     <button class="btn" style="margin-top: 10px;">Criar Conta (+500,00 Yinporion)</button>
   </form>
 
-  <!-- Informação do Administrador -->
   <div class="admin-credentials">
     Acesso Administrador:<br>
     Usuário: <strong>ADM</strong> | Senha: <strong>vagalume</strong>
@@ -122,7 +126,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
     <h1><span id="displayUserName">--</span> <small id="displayUserCode" style="font-size:16px; color:var(--accent); margin-left: 8px;"></small></h1>
   </div>
   <div class="top-user-actions">
-    <!-- Sistema de Notificações -->
     <div class="notification-bell" onclick="toggleNotifications()" title="Notificações">
       🔔
       <span id="notifBadge" class="notification-badge">0</span>
@@ -163,7 +166,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 </div>
 </section>
 
-<!-- SEÇÃO DE INVESTIMENTOS COM RENDIMENTO -76% A +100% -->
 <section id="investments" class="page">
 <div class="top"><div><div class="label">Ympori Bank</div><h1>Área de Investimentos</h1></div></div>
 <div class="grid">
@@ -200,7 +202,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 </div>
 </section>
 
-<!-- SEÇÃO DE PERFIL COM PERSONALIZAÇÃO -->
 <section id="profile" class="page">
 <div class="top"><div><div class="label">Conta</div><h1>Meu perfil</h1></div></div>
 <div class="grid">
@@ -246,7 +247,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 <button onclick="showPage('profile',this)">◉<br>Perfil</button>
 </div>
 
-<!-- MODAL DE CONFIRMAÇÃO DE TRANSFERÊNCIA -->
 <div id="transferModal" class="modal">
   <div class="modal-content">
     <h2 style="margin-bottom:16px;">Transferir Yinporion</h2>
@@ -259,7 +259,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
       </div>
     </form>
 
-    <!-- Tela de Revisão/Confirmação -->
     <div id="transferFormStep2" style="display:none; margin-top:10px;">
       <p class="label" style="margin-bottom:12px;">Por favor, confirme os dados da transferência:</p>
       <div style="background:var(--panel2); padding:12px; border-radius:10px; margin-bottom:15px; font-size:14px; display:grid; gap:6px;">
@@ -275,7 +274,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
   </div>
 </div>
 
-<!-- MODAL DE INVESTIMENTO (APLICAR OU RESGATAR) -->
 <div id="investModal" class="modal">
   <div class="modal-content">
     <h2 id="investModalTitle" style="margin-bottom:16px;">Investir</h2>
@@ -292,34 +290,50 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 <div id="toast" class="toast"></div>
 
 <script>
-let accounts = JSON.parse(localStorage.getItem('ympori_accounts')) || {};
+let accounts = {};
 let currentUser = localStorage.getItem('ympori_session') || null;
 let pendingTransferData = null;
 let investActionType = 'invest';
 
+// Inicialização com Firebase Realtime Database
 function initDB() {
-  // Inicialização do usuário ADM
-  if (!accounts['ADM'] || accounts['ADM'].investedBalance === undefined) {
-    accounts['ADM'] = {
-      name: 'Administrador',
-      pass: 'vagalume',
-      code: 'YMP-0000',
-      balance: Infinity,
-      investedBalance: 0,
-      lastYield: 0,
-      avatarLetter: 'A',
-      customColor: '#8b7cff',
-      isAdmin: true,
-      cardNum: '9999',
-      transactions: [],
-      notifications: []
-    };
-    saveAccounts();
-  }
+  const accountsRef = window.dbRef(window.db, 'accounts');
+  
+  // Escuta alterações na base de dados em tempo real
+  window.dbOnValue(accountsRef, (snapshot) => {
+    accounts = snapshot.val() || {};
+
+    // Garante que a conta ADM existe no Firebase
+    if (!accounts['ADM']) {
+      accounts['ADM'] = {
+        name: 'Administrador',
+        pass: 'vagalume',
+        code: 'YMP-0000',
+        balance: 999999999, // Utilizado número elevado para representar o infinito
+        investedBalance: 0,
+        lastYield: 0,
+        avatarLetter: 'A',
+        customColor: '#8b7cff',
+        isAdmin: true,
+        cardNum: '9999',
+        transactions: [],
+        notifications: []
+      };
+      saveAccounts();
+    }
+
+    if (currentUser && accounts[currentUser]) {
+      loadApp();
+    }
+  });
 }
 
 function saveAccounts() {
-  localStorage.setItem('ympori_accounts', JSON.stringify(accounts));
+  window.dbSet(window.dbRef(window.db, 'accounts'), accounts);
+}
+
+function saveUser(userKey) {
+  window.dbSet(window.dbRef(window.db, 'accounts/' + userKey), accounts[userKey]);
 }
 
 function switchAuthTab(tab) {
@@ -336,7 +350,7 @@ function switchAuthTab(tab) {
   }
 }
 
-function handleRegister(e) {
+async function handleRegister(e) {
   e.preventDefault();
   const name = document.getElementById('regName').value.trim();
   const user = document.getElementById('regUser').value.trim();
@@ -369,7 +383,7 @@ function handleRegister(e) {
     ]
   };
 
-  saveAccounts();
+  await saveUser(user);
   toast('Conta criada com sucesso!');
   currentUser = user;
   localStorage.setItem('ympori_session', currentUser);
@@ -415,7 +429,7 @@ function processMarketYield(acc) {
     
     if (!acc.notifications) acc.notifications = [];
     acc.notifications.unshift({ text: textMsg, date: new Date().toLocaleDateString('pt-BR') });
-    saveAccounts();
+    saveUser(currentUser);
   } else {
     acc.lastYield = 0;
   }
@@ -604,7 +618,7 @@ function backToTransferStep1() {
   document.getElementById('transferFormStep2').style.display = 'none';
 }
 
-function executeConfirmedTransfer() {
+async function executeConfirmedTransfer() {
   if (!pendingTransferData) return;
   const { recipientKey, amount } = pendingTransferData;
   const sender = accounts[currentUser];
@@ -620,6 +634,7 @@ function executeConfirmedTransfer() {
 
   const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
 
+  if (!sender.transactions) sender.transactions = [];
   sender.transactions.push({
     type: 'out',
     title: `Envio p/ ${recipient.name}`,
@@ -627,6 +642,7 @@ function executeConfirmedTransfer() {
     amount: amount
   });
 
+  if (!recipient.transactions) recipient.transactions = [];
   recipient.transactions.push({
     type: 'in',
     title: `Recebido de ${sender.name}`,
@@ -640,7 +656,7 @@ function executeConfirmedTransfer() {
     date: dateStr
   });
 
-  saveAccounts();
+  await saveAccounts();
   closeTransferModal();
   toast('Transferência realizada com sucesso!');
   loadApp();
@@ -657,7 +673,7 @@ function closeInvestModal() {
   document.getElementById('investModal').style.display = 'none';
 }
 
-function handleInvestAction(e) {
+async function handleInvestAction(e) {
   e.preventDefault();
   const amount = parseFloat(document.getElementById('investAmountInput').value);
   const acc = accounts[currentUser];
@@ -685,12 +701,12 @@ function handleInvestAction(e) {
     toast('Resgate realizado com sucesso!');
   }
 
-  saveAccounts();
+  await saveUser(currentUser);
   closeInvestModal();
   loadApp();
 }
 
-function handleSaveProfileCustomization(e) {
+async function handleSaveProfileCustomization(e) {
   e.preventDefault();
   const newName = document.getElementById('customProfileName').value.trim();
   const newLetter = document.getElementById('customAvatarLetter').value.trim().toUpperCase();
@@ -700,18 +716,18 @@ function handleSaveProfileCustomization(e) {
     accounts[currentUser].name = newName;
     accounts[currentUser].avatarLetter = newLetter || newName.charAt(0).toUpperCase();
     accounts[currentUser].customColor = newColor;
-    saveAccounts();
+    await saveUser(currentUser);
     toast('Perfil personalizado com sucesso!');
     loadApp();
   }
 }
 
-function handleSaveSettings(e) {
+async function handleSaveSettings(e) {
   e.preventDefault();
   const newName = document.getElementById('setProfileName').value.trim();
   if (newName) {
     accounts[currentUser].name = newName;
-    saveAccounts();
+    await saveUser(currentUser);
     toast('Nome alterado com sucesso!');
     loadApp();
   }
@@ -739,9 +755,12 @@ window.onclick = function(event) {
   }
 }
 
-// Inicialização
-initDB();
-loadApp();
+// Inicialização da base de dados online
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    initDB();
+  }, 1000);
+});
 </script>
 </body>
 </html>
