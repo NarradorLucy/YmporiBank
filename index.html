@@ -252,7 +252,6 @@ form{display:grid;gap:12px;max-width:480px}.field{display:grid;gap:6px}.field la
 <div id="toast" class="toast"></div>
 
 <script>
-// URL da API configurada com o seu Deployment ID do Google Apps Script
 const API_URL = "https://script.google.com/macros/s/AKfycbyin4Und1JN-lPq9vBjDpz4EzeXb7g_GkBe44SmRyzvQGNBKwTYEZo0CFquPYCPioM/exec";
 
 let accounts = JSON.parse(localStorage.getItem('ympori_accounts')) || {};
@@ -263,7 +262,7 @@ let investActionType = 'invest';
 async function syncDriveData() {
   if (!API_URL) return;
   try {
-    const response = await fetch(API_URL);
+    const response = await fetch(API_URL, { redirect: "follow" });
     const remoteData = await response.json();
     if (remoteData && Object.keys(remoteData).length > 0) {
       accounts = remoteData;
@@ -280,6 +279,8 @@ async function saveAccounts() {
   try {
     await fetch(API_URL, {
       method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(accounts)
     });
   } catch (e) {
@@ -305,7 +306,7 @@ async function initDB() {
       transactions: [],
       notifications: []
     };
-    saveAccounts();
+    await saveAccounts();
   }
 
   loadApp();
